@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @tag.name %>
+</p>
+
+<p>
+  <strong>Manual:</strong>
+  <%= @tag.manual %>
+</p>
+
+<p>
+  <strong>Created at:</strong>
+  <%= @tag.created_at %>
+</p>
+
+<p>
+  <strong>Updated at:</strong>
+  <%= @tag.updated_at %>
+</p>
+
+<%= link_to 'Edit', edit_tag_path(@tag) %> |
+<%= link_to 'Back', tags_path %>

@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  thingiverse_id: 1
+  download_count: 1
+  thing: 
+
+two:
+  name: MyString
+  thingiverse_id: 1
+  download_count: 1
+  thing: 

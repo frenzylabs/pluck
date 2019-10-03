@@ -1,0 +1,17 @@
+defaults: &defaults
+  thingiverse:
+    client_id: <%= ENV.fetch('THINGIVERSE_CLIENT') { "43395e7581ee2d8c2e7f" } %>
+    client_secret: <%= ENV.fetch('THINGIVERSE_CLIENT_SECRET') { "e91444ed024f710c4ddd41dd32df00a3" } %>
+    app_token: <%= ENV.fetch('THINGIVERSE_APP_TOKEN') { "0adc3e53ca8320095f9f747b938785e2" } %>
+
+development:
+  <<: *defaults
+
+staging:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
