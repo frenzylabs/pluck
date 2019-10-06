@@ -13,6 +13,39 @@ namespace :things do
     create_things("/featured", params)
   end
 
+  task :recent, [:start] => :environment do |t, args|
+    Rails.logger = Logger.new(STDOUT)
+    Rails.logger.level = Logger::INFO
+    startPage = args[:start].to_i || 1 #356 #2705
+    
+    params = {page: startPage, sort: :date, order: :desc}
+    hasError = false
+    hasMore = true
+    retryCount = 0
+    while !hasError && hasMore
+      hasMore = false
+      # hasError = true
+      res = create_things("/newest", params)
+      if res.key?(:error)
+        if res.key?(:retry) && res[:retry] < 15
+          hasMore = true
+        else
+          hasError = true
+        end
+      elsif res.key?(:success) && res[:success] > 0
+        params[:page] = params[:page] + 1
+        puts params[:page] if params[:page] % 100 #== 0
+        retryCount = 0
+        @retry = 0
+        hasMore = true #unless params[:page] - startPage > 2
+      elsif retryCount < 3
+        puts "retrying"
+        retryCount += 1
+        hasMore = true
+      end
+    end
+  end
+
   task :tags => :environment do
     startPage = 2689
     params = {page: startPage, sort: :date, order: :desc}
@@ -187,7 +220,7 @@ end
 
 def build_tag(tjson)
   {
-    name: tjson["name"],
+    name: tjson["name"].downcase,
     thing_count: tjson["count"]
   }  
 end
@@ -435,7 +468,7 @@ def create_things(path, params)
         end
         thing
       end
-      ures = User.import(users, on_duplicate_key_ignore: true)
+      ures = User.bulk_import(users, on_duplicate_key_ignore: true)
       
       cusers = User.where(thingiverse_id: users.pluck(:thingiverse_id)).map {|u| [u.thingiverse_id, u] }.to_h
       
@@ -448,22 +481,10 @@ def create_things(path, params)
       # binding.pry
       # cusers = User.find_by(thingiverse_id: user_ids)
 
-      res = Thing.import(validthings, on_duplicate_key_ignore: true, returning: :id)
+      res = Thing.bulk_import(validthings, on_duplicate_key_ignore: true, returning: :id)
       if res.failed_instances.count > 0
         Rails.logger.info("Thing Res: Failed: #{res.failed_instances},  Num IDS: #{res.ids.count}, , Num Inserts: #{res.num_inserts}, ")
       end
-      # binding.pry
-      # binding.pry
-      # thing_ids = res.ids
-      # resp.body.each do |thing|
-      #   sthing = Thing.find_or_initialize_by(:thingiverse_id => thing["id"])
-      #   updated = sthing.update_attributes(build_thing(thing))
-      #   if updated
-      #     thing_ids << sthing.id
-      #   else
-      #     puts ("Failed Creating Thing #{thing["id"]} #{sthing.errors}")
-      #   end
-      # end
     end
     return {success: resp.body.length, thingiverse_ids: thingiverse_ids}
   end
@@ -505,23 +526,6 @@ def fetch_from_thingiverse(path, params)
     resp
   end
 
-  # if resp.body.length > 0
-  #   resp.body.each do |thing|
-  # if resp.body["public_url"]
-  #   uri = URI(resp.body["public_url"])
-  #   code, tmpfilepath = download_to_tmp_path(uri)        
-  #   logger.info(tmpfilepath)
-
-  #   if code != 200 
-  #     raise LayerKeepErrors::LayerKeepError.new(error_msg, code) and return 
-  #   end
-
-  #   files = Zip::File.open(tmpfilepath)
-  #   commit_message = "Created From Thingiverse #{params[:thing_id]}"
-  #   return files, commit_message
-  # end
-
-  # raise LayerKeepErrors::LayerKeepError.new(error_msg, resp.status) and return 
 rescue Faraday::ConnectionFailed => e
   @conn = nil
   @retry ||= 0
@@ -530,34 +534,3 @@ rescue Faraday::ConnectionFailed => e
 rescue Exception => e
   {error: "#{e}"}
 end
-
-# def download_to_tmp_path(url, query = nil)
-#   uri = URI(url)
-#   if query
-#     uri.query = URI.encode_www_form query
-#   end
-
-#   Net::HTTP.start(uri.host, uri.port, :use_ssl => (uri.scheme == 'https')) do |http|
-#     request = Net::HTTP::Get.new uri.request_uri
-#     http.request request do |response|
-#       case response
-#       when Net::HTTPForbidden 
-#         return response.code, "Forbidden"
-#       when Net::HTTPOK
-#         ext = ".zip"
-#         tmp = Tempfile.create([ 'repo', ext ])
-#         tmp_path = tmp.path
-#         tmp.close
-#         File.open tmp_path, 'wb' do |io|
-#           response.read_body do |chunk|
-#             io.write chunk
-#           end
-#         end
-#         return 200, tmp_path
-#       else
-#         return 400, "Error"
-#       end
-#     end
-#   end
-#   return 400, "Error"
-# end

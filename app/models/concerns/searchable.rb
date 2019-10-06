@@ -126,20 +126,13 @@ module Searchable
               query: {
                 bool: {
                   must: [
-                  # {
-                  #   multi_match: {
-                  #     query: query,
-                  #     fields: ["name", "name.lower"]
-                  #     # fields: ["thing_files.name", "thing_files.name.exact"]
-                  #   }
-                  # },
                   {
                     bool: {
                       should: [
                         {
                           multi_match: {
                             query: query,
-                            fields: ["name"],
+                            fields: ["name", "user.name"],
                             boost: 3
                           }
                         },
@@ -170,15 +163,15 @@ module Searchable
                   gauss: {
                     like_count: {
                         origin: 5000,
-                        scale: 1000
+                        scale: 200
                     }
                   }
                 },
                 {
                   gauss: {
                     download_count: {
-                        origin: 20000,
-                        scale: 20000
+                        origin: 500,
+                        scale: 200
                     }
                   }
                 }
@@ -343,6 +336,10 @@ end
 # t = Thing.find(1)
 # t.__elasticsearch__.index_document
 # Thing.includes(:categories, :tags, :user, :thing_files).where("id < 100").each {|t| t.__elasticsearch__.index_document }
+# User.first.things.includes(:categories, :tags, :user, :thing_files).each {|t| t.__elasticsearch__.index_document }
 
 # Thing.includes(:categories, :tags, :user, :thing_files).where("id < 100").map {|t| t.tags.map(&:lname) }
 # Thing.includes(:categories, :tags, :user, :thing_files).where("id < 100").map {|t| t.thing_files.map(&:name) }
+
+
+# Thing.includes(:categories, :tags, :user, :thing_files).where("id >= 100 and id < 10000").each {|t| t.__elasticsearch__.index_document }

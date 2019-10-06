@@ -6,7 +6,7 @@ ruby '2.6.1'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.2.3'
 # Use sqlite3 as the database for Active Record
-gem 'sqlite3'
+# gem 'sqlite3'
 gem 'pg',         '>= 0.18', '< 2.0'
 # Use Puma as the app server
 gem 'puma', '~> 3.11'
@@ -38,14 +38,17 @@ gem 'jbuilder', '~> 2.5'
 gem 'bootsnap', '>= 1.1.0', require: false
 gem 'kaminari'
 
-gem 'elasticsearch-model', path: '/Users/kmussel/Development/frenzylabs/elasticsearch-rails/elasticsearch-model'
-gem 'elasticsearch-rails', path: '/Users/kmussel/Development/frenzylabs/elasticsearch-rails'
-gem 'elasticsearch-persistence', path: '/Users/kmussel/Development/frenzylabs/elasticsearch-rails/elasticsearch-persistence'
+gem 'elasticsearch-model' #, path: '/Users/kmussel/Development/frenzylabs/elasticsearch-rails/elasticsearch-model'
+gem 'elasticsearch-rails' #, path: '/Users/kmussel/Development/frenzylabs/elasticsearch-rails'
+gem 'elasticsearch-persistence' #, path: '/Users/kmussel/Development/frenzylabs/elasticsearch-rails/elasticsearch-persistence'
 
 gem 'faraday'
 gem 'faraday_middleware'
 
 gem 'activerecord-import'
+
+gem 'webpacker'
+gem 'react-rails'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
