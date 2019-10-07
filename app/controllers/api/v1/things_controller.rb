@@ -8,7 +8,7 @@ class Api::V1::ThingsController < ApplicationController
     page = params.fetch("page", 1)
     @things = 
       if params[:q].blank?
-        Thing.includes(:categories, :tags, :user).order("id desc").
+        Thing.includes(:categories, :tags, :user).order("added_on desc").
           page(page).per(per_page).collect do |t|
             t.as_json(
               include: { categories: { only: :name},

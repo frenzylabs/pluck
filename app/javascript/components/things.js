@@ -79,12 +79,17 @@ export default class Things extends React.Component {
     this.setState({search: {...this.state.search, page: 1, q: this.state.searchTerm}})
   }
 
+  renderImage(url) {
+    var lurl = url.replace(/(thumb_)(medium)(\.)/, '$1large$3');
+    return (<Image src={`${lurl}`} onError={(ev) => ev.target.src = url } />)    
+  }
+
   render(){
     var things = this.state.things.map((thing) => {
       return (
         <Grid.Column key={thing.id} className={"thing"}>
             <div className={"thing-top"}>
-              <Image src={`${thing.image_url}`} />
+              {this.renderImage(thing.image_url)}              
               <Label>{thing.name}</Label>
             </div>
             <Menu>
@@ -92,7 +97,7 @@ export default class Things extends React.Component {
                 <span>Visit</span>
               </Menu.Item>
 
-              <a className={"link"} target="_blank" href={`http://layerkeep.local/projects/new?source=thingiverse&thing_id=${thing.thingiverse_id}`}>
+              <a className={"link"} target="_blank" href={`https://layerkeep.dev/projects/new?source=thingiverse&thing_id=${thing.thingiverse_id}`}>
                 <span>Manage On Layerkeep</span>
               </a>
             </Menu>

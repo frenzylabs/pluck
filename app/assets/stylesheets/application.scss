@@ -12,7 +12,8 @@
  *
 */
 
-@import "semantic-ui-css/semantic";
+$semantic-font-path: "semantic-ui";
+@import "semantic-ui/semantic.scss";
 
 /*
  *= require_tree .
