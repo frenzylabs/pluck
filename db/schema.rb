@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_28_203437) do
+ActiveRecord::Schema.define(version: 2019_10_07_173715) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
@@ -68,6 +68,7 @@ ActiveRecord::Schema.define(version: 2019_09_28_203437) do
     t.bigint "thing_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "image_url"
     t.index ["thing_id"], name: "index_thing_files_on_thing_id"
     t.index ["thingiverse_id"], name: "index_thing_files_on_thingiverse_id", unique: true
   end

@@ -11,8 +11,7 @@ export default class Things extends React.Component {
     super(props);
 
     var qparams = qs.parse(this.props.location.search, { ignoreQueryPrefix: true })
-    console.log(props);
-    console.log(qparams)
+
     this.state = {
       things: [],
       search: {

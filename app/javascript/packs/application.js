@@ -22,8 +22,6 @@ import ReactDOM     from 'react-dom';
 import { BrowserRouter }  from 'react-router-dom'
 import App    from '../app';
 
-console.log('Hello World from Webpacker')
-
 // import 'semantic-ui-less/semantic.less'
 // import 'semantic-ui-css/semantic.min.css'
 

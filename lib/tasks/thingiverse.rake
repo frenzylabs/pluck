@@ -177,8 +177,79 @@ namespace :things do
       puts "Failed on id: #{currentID}"
       raise
     end
-    
   end
+
+  task :fetch_files, [:start_id, :end_id] => :environment do |t, args|
+    Rails.logger = Logger.new(STDOUT)
+    Rails.logger.level = Logger::INFO
+    params = {page: 1}
+
+    start_id = args[:start_id].to_i || 0    
+    batch_size = 500
+    offset = 0
+    thingquery = Thing.includes(:thing_files).where("id >= #{start_id}")
+    end_id = args[:end_id].to_i || 0  
+    thingquery = thingquery.where("id <= #{end_id}") if end_id > 0
+
+    Rails.logger.info("Starting ID #{start_id}")
+    cnt = 0
+    hasMore = true
+    while hasMore
+      hasMore = false
+      cnt += 1
+      Rails.logger.info("Starting Cnt #{cnt}")
+      doccnt = thingquery.limit(batch_size).offset(offset).each do |t|
+        fresp = fetch_thing_files(t)
+        # t.thing_files
+      end 
+      # {|t| t.__elasticsearch__.index_document }.count
+      if doccnt == batch_size
+        offset += batch_size
+        hasMore = true
+      end
+    end
+  end
+
+  task :download_files, [:start_id, :end_id] => :environment do |t, args|
+    Rails.logger = Logger.new(STDOUT)
+    Rails.logger.level = Logger::INFO
+    params = {page: 1}
+
+    start_id = args[:start_id].to_i || 0    
+    batch_size = 500
+    offset = 0
+    thingquery = ThingFile.where("thing_id >= #{start_id}")
+    end_id = args[:end_id].to_i || 0  
+    thingquery = thingquery.where("thing_id <= #{end_id}") if end_id > 0
+
+    Rails.logger.info("Starting ID #{start_id}")
+    cnt = 0
+    hasMore = true
+    while hasMore
+      hasMore = false
+      cnt += 1
+      Rails.logger.info("Starting Cnt #{cnt}")
+      doccnt = thingquery.limit(batch_size).offset(offset).each do |tf|
+        # fresp = fetch_thing_files(t)
+        unless tf.image_url.blank?
+          ext = tf.image_url.split(".").last
+          trainimage = "#{tf.thingiverse_id}-#{tf.name}.#{ext}"
+          open(tf.image_url) do |image|
+            File.open("/Users/kmussel/Development/metismachine/visual-search-model/input_images/#{trainimage}", "wb") do |file|
+              file.write(image.read)
+            end
+          end
+        end
+        # t.thing_files
+      end 
+      # {|t| t.__elasticsearch__.index_document }.count
+      if doccnt == batch_size
+        offset += batch_size
+        hasMore = true
+      end
+    end
+  end
+
 end
 
 def build_user(ujson)
@@ -267,7 +338,17 @@ def build_thing_file(f, thing = nil)
   #   thingiverse_id: f["id"],
   #   download_count: f["download_count"]
   # }
-  [f["name"], f["id"], f["download_count"], thing.id, DateTime.now.utc, DateTime.now.utc]
+  image_url = ""
+  if f["default_image"] && f["default_image"]["sizes"]
+    
+    dfimage = f["default_image"]["sizes"].find { |im| im["size"] == "large" && im["type"] == "preview" }
+    if dfimage && dfimage["url"]
+      image_url = dfimage["url"]
+    end
+    # binding.pry
+    # Rails.logger.info(image_url)
+  end
+  [f["name"], f["id"], f["download_count"], thing.id, image_url, DateTime.now.utc, DateTime.now.utc]
 end
 
 
@@ -280,14 +361,14 @@ def fetch_thing_files(thing, params = {})
   else
     
     if resp.body.length > 0
-      columns = ["name", "thingiverse_id", "download_count", "thing_id", "created_at", "updated_at"]
+      columns = ["name", "thingiverse_id", "download_count", "thing_id", "image_url", "created_at", "updated_at"]
       hm = resp.body.map {|v| [v["id"], build_thing_file(v, thing)] }.to_h
       filethingids = hm.keys 
       exist = thing.thing_files.select(:thingiverse_id).where(thingiverse_id: filethingids).pluck(:thingiverse_id)
-      thingfiles = (filethingids - exist).map{|id| hm[id] }
+      thingfiles = (filethingids).map{|id| hm[id] }
 
       # binding.pry
-      res = ThingFile.import(columns, thingfiles, on_duplicate_key_ignore: true)
+      res = ThingFile.import(columns, thingfiles, on_duplicate_key_update: {conflict_target: [:thingiverse_id], columns: [:download_count, :updated_at, :image_url]})
       # thing.thing_files.build(thingfiles)
       # binding.pry
       return res
