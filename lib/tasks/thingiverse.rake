@@ -150,14 +150,15 @@ namespace :things do
     end
   end
 
-  task :details, [:start] => :environment do |t, args|
+  task :details, [:start,:end_id] => :environment do |t, args|
     Rails.logger = Logger.new(STDOUT)
     Rails.logger.level = Logger::INFO
     params = {page: 1}
     job = Job.last
     # start_id = 196
     start_id = args[:start].to_i || 0 #356 #2705
-    end_id  = start_id + 25000
+    # end_id  = start_id + 25000
+    end_id = args[:end_id].to_i || start_id + 25000
     # start_id = 1196
     # end_id  = start_id + 804 #1000
     currentID = start_id

@@ -2,6 +2,7 @@ import React              from 'react'
 import { Link }         from 'react-router-dom';
 
 const qs = require('qs');
+import * as tf from '@tensorflow/tfjs';
 
 import { Form, Input, Button, Menu, Grid, Image, Label } from 'semantic-ui-react'
 import { Pagination } from 'semantic-ui-react'
@@ -26,10 +27,20 @@ export default class Things extends React.Component {
     this.searchChange = this.searchChange.bind(this)
     this.searchThings = this.searchThings.bind(this)
     this.onPageChange = this.onPageChange.bind(this)
+    window.t = this
+    window.tf = tf;
+    
   }
 
   componentDidMount(){
     this.loadThings()
+    this.model = tf.loadLayersModel('http://localhost:3001/models/model.json')
+    console.log(this.model);
+    // .then((val) => {
+    //   console.log("MODEL LOADED =", val)
+    //   // this.model = val
+
+    // })
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -78,6 +89,67 @@ export default class Things extends React.Component {
     this.setState({search: {...this.state.search, page: 1, q: this.state.searchTerm}})
   }
 
+  
+
+  onFileChange(evt) {
+    evt.persist()
+    console.log(evt.target);
+    window.evt = evt;
+    // var files = evt.dataTransfer.files // Array of all files
+    var file = evt.target.files[0]
+    
+    var reader = new FileReader()
+    // reader.onload = async function(file_load_event) {
+    //   var readInImage = document.createElement("img")
+    //   readInImage.onload = function() {
+    //     visualSearch.search(readInImage)
+    //         visualSearch.resizeAndDisplayImage(el, readInImage)
+    //       }
+    //       readInImage.src = file_load_event.target.result
+    //   }
+      reader.onload = async (file_load_event) => {
+        var readInImage = document.createElement("img")
+        readInImage.onload = () => {
+          this.searchImage(readInImage)
+          // visualSearch.resize4AndDisplayImage(el, readInImage)
+        }
+        readInImage.src = file_load_event.target.result
+      }
+      reader.readAsDataURL(file)
+  }
+
+  async searchImage(img) {
+    console.log("searchImage");
+    const raw = tf.browser.fromPixels(img)
+    const resized = tf.image.resizeBilinear(raw, [224, 224])
+    const expanded = resized.expandDims(0)
+    const prediction = await this.model.then(model => model.predict(expanded))
+    const similarities = await prediction.array()
+
+    const indices = similarities[0]
+      .map((val, index) => {return {index, val}})
+      .sort((a, b) => {return a.val < b.val ? 1 : -1 })
+      .slice(0, 10)
+      .map(o => o.index)
+
+    console.log(indices);
+    // this.loadSearchResults(indices)
+
+    raw.dispose()
+    resized.dispose()
+    expanded.dispose()
+    prediction.dispose()
+  }
+
+  async fileLoaded(file_load_event) {
+    var readInImage = document.createElement("img")
+    readInImage.onload = () => {
+      this.search(readInImage)
+      visualSearch.resize4AndDisplayImage(el, readInImage)
+    }
+    readInImage.src = file_load_event.target.result
+
+  }
   renderImage(url) {
     var lurl = url.replace(/(thumb_)(medium)(\.)/, '$1large$3');
     return (<Image src={`${lurl}`} onError={(ev) => ev.target.src = url } />)    
@@ -113,6 +185,7 @@ export default class Things extends React.Component {
     return (
       <div className={"column container ui"}>
         <div className={"container"} style={{"margin": "20px"}}>
+          <div><input type="file" name="img" id="imgfile" onChange={(evt) => this.onFileChange(evt) } /></div>
           <Form onSubmit={this.searchThings}>
             <Form.Field >
               <Input action={{ icon: 'search' }} onChange={this.searchChange} placeholder='Search...' value={this.state.searchTerm} />
