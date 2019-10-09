@@ -186,7 +186,7 @@ namespace :things do
     params = {page: 1}
 
     start_id = args[:start_id].to_i || 0    
-    batch_size = 500
+    batch_size = 200
     offset = 0
     thingquery = Thing.includes(:thing_files).where("id >= #{start_id}")
     end_id = args[:end_id].to_i || 0  
@@ -199,12 +199,13 @@ namespace :things do
       hasMore = false
       cnt += 1
       Rails.logger.info("Starting Cnt #{cnt}")
-      doccnt = thingquery.limit(batch_size).offset(offset).each do |t|
+      docs = thingquery.limit(batch_size).offset(offset).each do |t|
         fresp = fetch_thing_files(t)
         # t.thing_files
-      end 
+      end
+      # Rails.logger.info("Doccnt = #{docs.count}")
       # {|t| t.__elasticsearch__.index_document }.count
-      if doccnt == batch_size
+      if docs.count == batch_size
         offset += batch_size
         hasMore = true
       end
