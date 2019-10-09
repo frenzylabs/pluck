@@ -2,10 +2,14 @@ import React              from 'react'
 import { Link }         from 'react-router-dom';
 
 const qs = require('qs');
+
 import * as tf from '@tensorflow/tfjs';
 
-import { Form, Input, Button, Menu, Grid, Image, Label } from 'semantic-ui-react'
+import { Card, Segment, Header, Divider, Icon, Form, Input, Button, Menu, Grid, Image, Label } from 'semantic-ui-react'
 import { Pagination } from 'semantic-ui-react'
+import { InputFile } from 'semantic-ui-react-input-file'
+import FileDrop from 'react-file-drop';
+ 
 
 export default class Things extends React.Component {
   constructor(props) {
@@ -27,20 +31,32 @@ export default class Things extends React.Component {
     this.searchChange = this.searchChange.bind(this)
     this.searchThings = this.searchThings.bind(this)
     this.onPageChange = this.onPageChange.bind(this)
+
+    this.imageInputRef = React.createRef();
     window.t = this
     window.tf = tf;
-    
   }
 
   componentDidMount(){
+    this.loadModel();
     this.loadThings()
-    this.model = tf.loadLayersModel('http://localhost:3001/models/model.json')
-    console.log(this.model);
-    // .then((val) => {
-    //   console.log("MODEL LOADED =", val)
-    //   // this.model = val
+  }
 
-    // })
+  async loadModel() {
+    this.model = new Promise((resolve, reject) => {
+      var amodel = tf.loadLayersModel('indexeddb://thing-model1');
+      amodel.then((data) => {
+        resolve(data)
+      }).catch((error) => {
+        console.log(error)
+        var bmodel = tf.loadLayersModel('/api/v1/model_versions/1/model.json')
+        bmodel.then((data) => {
+          data.save('indexeddb://thing-model1');
+        })
+        return resolve(bmodel)
+      });
+      return amodel
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -79,6 +95,27 @@ export default class Things extends React.Component {
       });
   }
 
+  loadSearchResults() {
+    const url = "/api/v1/model_versions/1/things.json"
+    var data = this.indices.slice((this.state.search.page - 1) * 100, 100)
+    fetch(url, {
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      // mode: 'cors', // no-cors, *cors, same-origin
+      // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, *same-origin, omit
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      redirect: 'follow', // manual, *follow, error
+      referrer: 'no-referrer', // no-referrer, *client
+      body: JSON.stringify({indices: this.indices}) // body data type must match "Content-Type" header
+    })
+    .then((response) => { return response.json()})
+    .then((data) => {
+      this.setState({ things: data.data}) 
+    })
+  }
+
   onPageChange(e, data) {
     this.setState({search: {...this.state.search, page: data.activePage}})
   }
@@ -89,51 +126,32 @@ export default class Things extends React.Component {
     this.setState({search: {...this.state.search, page: 1, q: this.state.searchTerm}})
   }
 
-  
-
   onFileChange(evt) {
-    evt.persist()
-    console.log(evt.target);
-    window.evt = evt;
-    // var files = evt.dataTransfer.files // Array of all files
-    var file = evt.target.files[0]
-    
-    var reader = new FileReader()
-    // reader.onload = async function(file_load_event) {
-    //   var readInImage = document.createElement("img")
-    //   readInImage.onload = function() {
-    //     visualSearch.search(readInImage)
-    //         visualSearch.resizeAndDisplayImage(el, readInImage)
-    //       }
-    //       readInImage.src = file_load_event.target.result
-    //   }
-      reader.onload = async (file_load_event) => {
-        var readInImage = document.createElement("img")
-        readInImage.onload = () => {
-          this.searchImage(readInImage)
-          // visualSearch.resize4AndDisplayImage(el, readInImage)
-        }
-        readInImage.src = file_load_event.target.result
-      }
-      reader.readAsDataURL(file)
+    if (evt.target.files.length > 0) {
+      var file = evt.target.files[0]
+      this.handleFileChange(file)
+    }
+    evt.target.value = ""
+
   }
 
   async searchImage(img) {
-    console.log("searchImage");
+    // console.log("searchImage");
     const raw = tf.browser.fromPixels(img)
     const resized = tf.image.resizeBilinear(raw, [224, 224])
     const expanded = resized.expandDims(0)
     const prediction = await this.model.then(model => model.predict(expanded))
     const similarities = await prediction.array()
 
-    const indices = similarities[0]
+    this.indices = similarities[0]
       .map((val, index) => {return {index, val}})
       .sort((a, b) => {return a.val < b.val ? 1 : -1 })
-      .slice(0, 10)
       .map(o => o.index)
 
-    console.log(indices);
-    // this.loadSearchResults(indices)
+    this.state.search.page = 1
+    var url = qs.stringify(this.state.search, { addQueryPrefix: true });
+    this.props.history.push(`${url}`);
+    this.loadSearchResults()
 
     raw.dispose()
     resized.dispose()
@@ -141,34 +159,99 @@ export default class Things extends React.Component {
     prediction.dispose()
   }
 
-  async fileLoaded(file_load_event) {
-    var readInImage = document.createElement("img")
-    readInImage.onload = () => {
-      this.search(readInImage)
-      visualSearch.resize4AndDisplayImage(el, readInImage)
-    }
-    readInImage.src = file_load_event.target.result
-
-  }
   renderImage(url) {
     var lurl = url.replace(/(thumb_)(medium)(\.)/, '$1large$3');
     return (<Image src={`${lurl}`} onError={(ev) => ev.target.src = url } />)    
   }
 
-  render(){
+  handleDrop(files, evt) {
+    this.handleFileChange(files[0])
+  }
+
+  handleFileChange(file) {
+    var reader = new FileReader()
+    reader.onload = async (file_load_event) => {
+      this.setState({modelImageSrc: file_load_event.target.result})
+      var readInImage = document.createElement("img")
+      readInImage.onload = () => {
+        this.searchImage(readInImage)
+      }
+      readInImage.src = file_load_event.target.result
+      
+    }
+    reader.readAsDataURL(file)
+  }
+  
+  renderImageModel() {
+    var imgSrc = this.state.modelImageSrc || 'https://react.semantic-ui.com/images/avatar/large/matthew.png'
+    var label = (
+      <Label
+        as='label'
+        style={{ cursor: 'pointer' }}
+        basic
+        content="Select an image to find similar models"
+        color="black"
+      />
+    )
+    return (      
+      <FileDrop onDrop={this.handleDrop.bind(this)}>
+        <Card style={{maxWidth: '224px', margin: '0 auto'}} >
+          <Image src={imgSrc} wrapped ui={false} style={{maxWidth: '224px', maxHeight: '224px'}} />
+          <Card.Content style={{padding: 0}}>
+              <InputFile 
+              button={{style: {margin: 0}, label: label, content: (<div>Select Image</div>)}}
+              input={{
+                id: 'input-file-id',
+                content: "Upload Image",
+                onChange: this.onFileChange.bind(this)
+              }}
+            />
+          </Card.Content>
+        </Card>
+      </FileDrop>
+    )
+  }
+
+  renderSearchForm() {
+    return (<Segment >
+    <Grid columns={2} stackable textAlign='center'>
+      <Divider vertical>Or</Divider>
+
+      <Grid.Row verticalAlign='middle'>
+        <Grid.Column style={{height: '100%'}}>
+          <h1 style={{color: 'black'}}>
+            Find Model
+          </h1>
+
+          <Form onSubmit={this.searchThings}>
+            <Form.Field style={{maxWidth: '100%'}}>
+              <Input action={{ icon: 'search' }} onChange={this.searchChange} placeholder='Search...' value={this.state.searchTerm} />
+            </Form.Field>
+          </Form>
+        </Grid.Column>
+
+        <Grid.Column>
+          {this.renderImageModel()}
+        </Grid.Column>
+      </Grid.Row>
+    </Grid>
+  </Segment>)
+  }
+
+  renderThings() {
     var things = this.state.things.map((thing) => {
       return (
         <Grid.Column key={thing.id} className={"thing"}>
             <div className={"thing-top"}>
-              {this.renderImage(thing.image_url)}              
-              <Label>{thing.name}</Label>
+              {this.renderImage(thing.attributes.image_url)}              
+              <Label>{thing.attributes.name}</Label>
             </div>
             <Menu>
-              <Menu.Item link={true} as={"a"} target="_blank" href={`http://thingiverse.com/thing:${thing.thingiverse_id}`}>
+              <Menu.Item link={true} as={"a"} target="_blank" href={`http://thingiverse.com/thing:${thing.attributes.thingiverse_id}`}>
                 <span>Visit</span>
               </Menu.Item>
 
-              <a className={"link"} target="_blank" href={`https://layerkeep.dev/projects/new?source=thingiverse&thing_id=${thing.thingiverse_id}`}>
+              <a className={"link"} target="_blank" href={`https://layerkeep.dev/projects/new?source=thingiverse&thing_id=${thing.attributes.thingiverse_id}`}>
                 <span>Manage On Layerkeep</span>
               </a>
             </Menu>
@@ -177,25 +260,26 @@ export default class Things extends React.Component {
       )
     })
 
+    return (<Grid doubling columns={5}>
+            {things}
+          </Grid>)
+
+  }
+
+  render(){
+
     var totalPages = this.state.search.page
-    if (things.length >= this.state.search.per_page) {
+    if (this.state.things.length >= this.state.search.per_page) {
       totalPages = this.state.search.page + 1
     }
 
     return (
       <div className={"column container ui"}>
         <div className={"container"} style={{"margin": "20px"}}>
-          <div><input type="file" name="img" id="imgfile" onChange={(evt) => this.onFileChange(evt) } /></div>
-          <Form onSubmit={this.searchThings}>
-            <Form.Field >
-              <Input action={{ icon: 'search' }} onChange={this.searchChange} placeholder='Search...' value={this.state.searchTerm} />
-            </Form.Field>
-          </Form>
+          {this.renderSearchForm()}
         </div>
         <div className={"container"}>
-          <Grid doubling columns={5}>
-            {things}
-          </Grid>
+            {this.renderThings()}
         </div>
         <Pagination
           boundaryRange={0}

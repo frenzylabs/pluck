@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_07_173715) do
+ActiveRecord::Schema.define(version: 2019_10_08_162735) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
@@ -37,6 +37,29 @@ ActiveRecord::Schema.define(version: 2019_10_07_173715) do
   end
 
   create_table "jobs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "model_version_images", force: :cascade do |t|
+    t.citext "name"
+    t.string "filepath"
+    t.integer "index"
+    t.jsonb "metadata", default: {}
+    t.jsonb "image_data"
+    t.bigint "model_version_id"
+    t.bigint "thing_id"
+    t.bigint "thing_file_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["model_version_id", "index"], name: "index_model_version_images_on_model_version_id_and_index", unique: true
+    t.index ["model_version_id"], name: "index_model_version_images_on_model_version_id"
+    t.index ["thing_file_id"], name: "index_model_version_images_on_thing_file_id"
+    t.index ["thing_id"], name: "index_model_version_images_on_thing_id"
+  end
+
+  create_table "model_versions", force: :cascade do |t|
+    t.integer "version"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

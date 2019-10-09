@@ -3,6 +3,12 @@ defaults: &defaults
     client_id: <%= ENV.fetch('THINGIVERSE_CLIENT') { "43395e7581ee2d8c2e7f" } %>
     client_secret: <%= ENV.fetch('THINGIVERSE_CLIENT_SECRET') { "e91444ed024f710c4ddd41dd32df00a3" } %>
     app_token: <%= ENV.fetch('THINGIVERSE_APP_TOKEN') { "0adc3e53ca8320095f9f747b938785e2" } %>
+  digitalocean: &do
+    access_key: <%= ENV.fetch('DIGITALOCEAN_ACCESS_KEY') { "KRG33E7ANFWWSJOYGTKT" } %>
+    secret_access_key: <%= ENV.fetch('DIGITALOCEAN_SECRET_ACCESS_KEY') { "3EnVkH/MNqLx8yQZ5MGjnI7tzMIoxo+iZVGo2s1oliY" } %>
+    region: <%= ENV.fetch('DIGITALOCEAN_REGION') { "sfo2" } %> 
+    bucket: <%= ENV.fetch('DIGITALOCEAN_BUCKET') { "layerkeep-dev" } %>
+    endpoint: <%= ENV.fetch('DIGITALOCEAN_ENDPOINT') { "https://sfo2.digitaloceanspaces.com" } %>  
 
 development:
   <<: *defaults

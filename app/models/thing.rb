@@ -12,6 +12,9 @@ class Thing < ApplicationRecord
 
   has_many :thing_files
 
+  has_many :model_version_images
+  
+
   # mapping do
   #   indexes :name
   # end

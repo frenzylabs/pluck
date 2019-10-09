@@ -150,15 +150,15 @@ namespace :things do
     end
   end
 
-  task :details, [:start,:end_id] => :environment do |t, args|
+  task :details, [:start, :end_id] => :environment do |t, args|
     Rails.logger = Logger.new(STDOUT)
     Rails.logger.level = Logger::INFO
     params = {page: 1}
     job = Job.last
     # start_id = 196
     start_id = args[:start].to_i || 0 #356 #2705
-    # end_id  = start_id + 25000
-    end_id = args[:end_id].to_i || start_id + 25000
+    end_id  = start_id + 25000
+    end_id = args[:end_id].to_i if args[:end_id]
     # start_id = 1196
     # end_id  = start_id + 804 #1000
     currentID = start_id
@@ -216,8 +216,17 @@ namespace :things do
     Rails.logger.level = Logger::INFO
     params = {page: 1}
 
+    client = Aws::S3::Client.new(
+      access_key_id: Rails.application.config.settings["digitalocean"]["access_key"],
+      secret_access_key: Rails.application.config.settings["digitalocean"]["secret_access_key"],
+      endpoint: Rails.application.config.settings["digitalocean"]["endpoint"],
+      region: Rails.application.config.settings["digitalocean"]["region"]
+    )
+
+    model_version = ModelVersion.last
+    index = (model_version.images.maximum("index") || 0) + 1
     start_id = args[:start_id].to_i || 0    
-    batch_size = 500
+    batch_size = 100
     offset = 0
     thingquery = ThingFile.where("thing_id >= #{start_id}")
     end_id = args[:end_id].to_i || 0  
@@ -226,23 +235,51 @@ namespace :things do
     Rails.logger.info("Starting ID #{start_id}")
     cnt = 0
     hasMore = true
+
+    columns = ["model_version_id", "thing_id", "thing_file_id", "name", "filepath", "index", "image_data", "created_at", "updated_at"]
     while hasMore
       hasMore = false
       cnt += 1
       Rails.logger.info("Starting Cnt #{cnt}")
+      model_images = []
       doccnt = thingquery.limit(batch_size).offset(offset).each do |tf|
-        # fresp = fetch_thing_files(t)
         unless tf.image_url.blank?
           ext = tf.image_url.split(".").last
-          trainimage = "#{tf.thingiverse_id}-#{tf.name}.#{ext}"
+          trainimage = "#{index}-#{tf.thingiverse_id}-#{tf.name}.#{ext}".downcase
+          filepath = "models/#{model_version.id}/images/#{trainimage}"
           open(tf.image_url) do |image|
-            File.open("/Users/kmussel/Development/metismachine/visual-search-model/input_images/#{trainimage}", "wb") do |file|
-              file.write(image.read)
-            end
+            res = client.put_object({
+              body: image,
+              bucket: Rails.application.config.settings["digitalocean"]["bucket"],
+              key: filepath
+            })
+
+            img_params = [
+              model_version.id,
+              tf.thing_id,
+              tf.id,
+              trainimage,
+              filepath,
+              index,
+              {"id": filepath, storage: 'store', metadata: {name: trainimage}},
+              DateTime.now.utc, 
+              DateTime.now.utc
+            ]
+            model_images << img_params
+            index += 1
+
           end
+          #   File.open("/Users/kmussel/Development/metismachine/visual-search-model/input_images/#{trainimage}", "wb") do |file|
+          #     file.write(image.read)
+          #   end
+          # end
         end
         # t.thing_files
       end 
+      
+      # binding.pry
+      res = ModelVersionImage.import(columns, model_images, on_duplicate_key_ignore: true)
+      Rails.logger.info(res)
       # {|t| t.__elasticsearch__.index_document }.count
       if doccnt == batch_size
         offset += batch_size
@@ -250,6 +287,10 @@ namespace :things do
       end
     end
   end
+
+end
+
+def build_model_version_image(data)
 
 end
 

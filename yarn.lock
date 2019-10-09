@@ -6884,6 +6884,13 @@ react-dom@^16.10.2:
     prop-types "^15.6.2"
     scheduler "^0.16.2"
 
+react-file-drop@^0.2.8:
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/react-file-drop/-/react-file-drop-0.2.8.tgz#de1e26cef0f1a5855fa1fb1e0cee32bc03c34466"
+  integrity sha512-tcrDDbU25C45eusLGpnRg5qx7BexsjJ+5qZMnjwvj0IrRiv7VWEtJ2h2XZsLCkuaAtQe8cF5WYFJbzhfctoZjA==
+  dependencies:
+    prop-types "^15.6.1"
+
 react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1:
   version "16.10.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.10.1.tgz#0612786bf19df406502d935494f0450b40b8294f"
@@ -7353,6 +7360,11 @@ selfsigned@^1.10.7:
   integrity sha512-8M3wBCzeWIJnQfl43IKwOmC4H/RAp50S8DF60znzjW5GVqTcSe2vWclt7hmYVPkKPlHWOu5EaWOMZ2Y6W8ZXTA==
   dependencies:
     node-forge "0.9.0"
+
+semantic-ui-react-input-file@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/semantic-ui-react-input-file/-/semantic-ui-react-input-file-1.0.3.tgz#016803d4377cf888cdf052290ecc4cce8ceed4ee"
+  integrity sha512-DqXkVCNz0hWgJCiAO+k2LdO1HyJUVwTCH29tCXMoJfw0yu8EXJ98QBDp3RR4zt5Xi5Z4tA+j3TGaqs7wujztVQ==
 
 semantic-ui-react@^0.88.1:
   version "0.88.1"
