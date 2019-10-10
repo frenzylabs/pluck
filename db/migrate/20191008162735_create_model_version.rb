@@ -11,11 +11,12 @@ class CreateModelVersion < ActiveRecord::Migration[5.2]
       t.integer    :index 
       t.jsonb      :metadata,         default: {}
       t.jsonb      :image_data
-      t.references :model_version
+      t.references :model_version, index: false
       t.references :thing
-      t.references :thing_file
+      t.references :thing_file, index: false
       t.timestamps
     end
     add_index :model_version_images, [:model_version_id, :index], unique: true
+    add_index :model_version_images, [:model_version_id, :thing_file_id], unique: true
   end
 end
