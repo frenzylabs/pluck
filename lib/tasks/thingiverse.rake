@@ -218,7 +218,7 @@ namespace :things do
         end
 
         ratelimit = (fresp[:headers] && fresp[:headers]["x-ratelimit-remaining"] && fresp[:headers]["x-ratelimit-remaining"].to_i) || -1
-        if fresp[:error] == "Enhance your calm"
+        if fresp[:calm]
           Rails.logger.info("RateLimit Calming Sleep #{ratelimit}")
           sleep(30)
         elsif ratelimit >= 0 && ratelimit < 3
@@ -691,6 +691,7 @@ def fetch_from_thingiverse(path, params)
       msg = {error: error_msg, url: path, headers: resp.headers}
       
       msg[:not_found] = true  if resp.body["error"] == "Not Found"
+      msg[:calm] = true  if resp.body["error"] && resp.body["error"].match?("calm")
       return msg
     end  
     resp
