@@ -35,7 +35,20 @@ COPY app/assets ${APP_DIR}/assets
 COPY app/javascript ${APP_DIR}/javascript
 COPY vendor ${RAILS_ROOT}/vendor
 # COPY config/webpack config/webpacker.yml ${RAILS_ROOT}/config/
-COPY config ./config
+
+# RUN mkdir -p ${RAILS_ROOT}/config/initializers
+# RUN mkdir ${RAILS_ROOT}/config/webpack
+# RUN mkdir ${RAILS_ROOT}/config/environments
+
+COPY config/webpack ./config/webpack
+COPY config/webpacker.yml ./config/webpacker.yml
+COPY config/initializers ./config/initializers
+COPY config/environments ./config/environments
+COPY config/application.rb ./config/application.rb
+COPY config/application.yml ./config/application.yml
+COPY config/boot.rb ./config/boot.rb
+
+# COPY config ./config
 COPY Rakefile package.json postcss.config.js babel.config.js ./
 
 
@@ -43,6 +56,8 @@ COPY Rakefile package.json postcss.config.js babel.config.js ./
 ENV SECRET_KEY_BASE=${SECRET_KEY_BASE:-c959724279db5ca746e7a88}
 
 RUN yarn install --check-files --production=true
+
+COPY config/environment.rb ./config/environment.rb
 RUN bundle exec rake assets:precompile
 
 COPY . .

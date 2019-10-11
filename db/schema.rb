@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_08_162735) do
+ActiveRecord::Schema.define(version: 2019_10_11_143007) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
@@ -53,8 +53,7 @@ ActiveRecord::Schema.define(version: 2019_10_08_162735) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["model_version_id", "index"], name: "index_model_version_images_on_model_version_id_and_index", unique: true
-    t.index ["model_version_id"], name: "index_model_version_images_on_model_version_id"
-    t.index ["thing_file_id"], name: "index_model_version_images_on_thing_file_id"
+    t.index ["model_version_id", "thing_file_id"], name: "index_model_version_images_on_model_version_id_and_thing_file_i", unique: true
     t.index ["thing_id"], name: "index_model_version_images_on_thing_id"
   end
 
@@ -109,7 +108,14 @@ ActiveRecord::Schema.define(version: 2019_10_08_162735) do
     t.integer "like_count", default: 0
     t.integer "download_count", default: 0
     t.bigint "job_id"
+    t.boolean "deleted", default: false
+    t.datetime "category_updated"
+    t.datetime "tag_updated"
+    t.datetime "file_updated"
+    t.index ["category_updated"], name: "index_things_on_category_updated"
+    t.index ["file_updated"], name: "index_things_on_file_updated"
     t.index ["job_id"], name: "index_things_on_job_id"
+    t.index ["tag_updated"], name: "index_things_on_tag_updated"
     t.index ["thingiverse_id"], name: "index_things_on_thingiverse_id", unique: true
     t.index ["user_id"], name: "index_things_on_user_id"
   end

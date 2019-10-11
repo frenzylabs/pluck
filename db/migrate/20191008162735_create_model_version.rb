@@ -20,3 +20,4 @@ class CreateModelVersion < ActiveRecord::Migration[5.2]
     add_index :model_version_images, [:model_version_id, :thing_file_id], unique: true
   end
 end
+   

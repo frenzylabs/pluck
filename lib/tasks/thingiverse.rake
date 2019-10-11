@@ -184,25 +184,51 @@ namespace :things do
     
     Rails.logger = Logger.new(STDOUT)
     Rails.logger.level = Logger::INFO
-  
+    trap('SIGINT') { puts "KILLED IT"; exit! }
+
     params = {page: 1}
-    start_id = args[:start_id].to_i || 0    
+    last_id = start_id = args[:start_id].to_i || 0    
     batch_size = 200
     offset = 0
-    thingquery = Thing.includes(:thing_files).where("id >= #{start_id}")
+    thingquery = Thing.includes(:thing_files).joins("LEFT JOIN thing_files on things.id = thing_files.thing_id").
+                where("thing_files.id IS NULL or thing_files.image_url IS NULL").where("things.id >= #{start_id} and things.deleted = ?", false).
+                where("file_updated IS NULL or file_updated < ?", DateTime.now.utc - 2.weeks)
+
     end_id = args[:end_id].to_i || 0  
-    thingquery = thingquery.where("id <= #{end_id}") if end_id > 0
+    thingquery = thingquery.where("things.id <= #{end_id}") if end_id > 0
     Rails.logger.info("Starting ID #{start_id}")
     cnt = 0
     hasMore = true
     while hasMore
       hasMore = false
       cnt += 1
-      Rails.logger.info("Starting Cnt #{cnt}")
+      Rails.logger.info("Starting Cnt #{cnt} lastid: #{last_id}, :offset: #{offset} - #{start_id + offset}")
+      thingids = []
       docs = thingquery.limit(batch_size).offset(offset).each do |t|
         fresp = fetch_thing_files(t)
+        
+
+        if fresp[:not_found]
+          t.deleted = true
+          t.file_updated = DateTime.now.utc
+          t.save
+        else
+          thingids << t.id  if !fresp[:error]
+          last_id = [last_id, t.id].max
+        end
+
+        ratelimit = (fresp[:headers] && fresp[:headers]["x-ratelimit-remaining"] && fresp[:headers]["x-ratelimit-remaining"].to_i) || -1
+        if fresp[:error] == "Enhance your calm"
+          Rails.logger.info("RateLimit Calming Sleep #{ratelimit}")
+          sleep(30)
+        elsif ratelimit >= 0 && ratelimit < 3
+          Rails.logger.info("RateLimit Sleep #{ratelimit}")
+          sleep(30)
+        end
         # t.thing_files
       end
+      
+      Thing.where(id: thingids).update_all(file_updated: DateTime.now.utc)  if thingids.count > 0
       # Rails.logger.info("Doccnt = #{docs.count}")
       # {|t| t.__elasticsearch__.index_document }.count
       if docs.count == batch_size
@@ -213,6 +239,7 @@ namespace :things do
   end
 
   task :download_files, [:version, :start_id, :end_id] => :environment do |t, args|
+    trap('SIGINT') { puts "KILLED IT"; exit! }
     Rails.logger = Logger.new(STDOUT)
     Rails.logger.level = Logger::INFO
     params = {page: 1}
@@ -234,9 +261,11 @@ namespace :things do
     start_id = args[:start_id].to_i || 0    
     batch_size = 100
     offset = 0
-    thingquery = ThingFile.where("thing_id >= #{start_id}").where("image_url IS NOT NULL and image_url != ''")
+    thingquery = ThingFile.joins("left join model_version_images on model_version_images.thing_file_id = thing_files.id and model_version_images.model_version_id = #{model_version.id}").
+                where("thing_files.thing_id >= #{start_id}").where("image_url IS NOT NULL and image_url != ''").                
+                where("model_version_images.id IS NULL")
     end_id = args[:end_id].to_i || 0  
-    thingquery = thingquery.where("thing_id <= #{end_id}") if end_id > 0
+    thingquery = thingquery.where("thing_files.thing_id <= #{end_id}") if end_id > 0
 
     Rails.logger.info("Starting ID #{start_id}")
     cnt = 0
@@ -276,7 +305,7 @@ namespace :things do
 
             end
           rescue
-            Rails.logger.info("Could not download image_url #{tf.id} #{tf.image_url}")
+            Rails.logger.info("Could not download image_url #{tf.thing_id}- file: #{tf.id} #{tf.image_url}")
           end
           #   File.open("/Users/kmussel/Development/metismachine/visual-search-model/input_images/#{trainimage}", "wb") do |file|
           #     file.write(image.read)
@@ -420,14 +449,20 @@ def fetch_thing_files(thing, params = {})
 
       # binding.pry
       res = ThingFile.import(columns, thingfiles, on_duplicate_key_update: {conflict_target: [:thingiverse_id], columns: [:download_count, :updated_at, :image_url]})
+      if res.failed_instances.count > 0
+        Rails.logger.info("Res: Failed: #{res.failed_instances},  Num IDS: #{res.ids.count}, , Num Inserts: #{res.num_inserts}, ")
+      end
       # thing.thing_files.build(thingfiles)
       # binding.pry
-      return res
+      # returnmsg = {headers: resp.headers, success: res.ids.count, failed: res.failed_instances.count }
+      # if res.ids.count == 0 && res.failed_instances.count > 0
+      #   returnmsg[:error] = "Failed to Update"
+      return {headers: resp.headers, success: res.ids.count, failed: res.failed_instances.count }
       # if !thing.valid?
       #     puts ("Failed Creating ThingFiles #{thing["id"]} #{thing.errors}")        
       # end
     end
-    return {success: thing.valid?}
+    return {headers: resp.headers, success: 0, failed: 0}
   end
 end
 
@@ -645,13 +680,18 @@ def fetch_from_thingiverse(path, params)
   
   # binding.pry
   # Rails.logger.info(resp.body)
+
   
   error_msg = "Error Retrieving From Thingiverse"
   if resp.body.is_a?(Hash)
     error_msg += ": #{resp.body["error"]}" if resp.body["error"]
     error_msg += ": #{resp.headers["x-error"]}" if resp.headers["x-error"]    
     if resp.body["error"] || resp.headers["x-error"]
-      return {error: error_msg, url: path}
+      Rails.logger.info("Error BODY: #{resp.body} HEADERS: #{resp.headers}")
+      msg = {error: error_msg, url: path, headers: resp.headers}
+      
+      msg[:not_found] = true  if resp.body["error"] == "Not Found"
+      return msg
     end  
     resp
   else 
