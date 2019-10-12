@@ -220,7 +220,7 @@ namespace :things do
         ratelimit = (fresp[:headers] && fresp[:headers]["x-ratelimit-remaining"] && fresp[:headers]["x-ratelimit-remaining"].to_i) || -1
         if fresp[:calm]
           Rails.logger.info("RateLimit Calming Sleep #{ratelimit}")
-          sleep(30)
+          sleep(45)
         elsif ratelimit >= 0 && ratelimit < 3
           Rails.logger.info("RateLimit Sleep #{ratelimit}")
           sleep(30)
