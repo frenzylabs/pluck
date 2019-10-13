@@ -192,11 +192,13 @@ namespace :things do
     offset = 0
     thingquery = Thing.includes(:thing_files).joins("LEFT JOIN thing_files on things.id = thing_files.thing_id").
                 where("thing_files.id IS NULL or thing_files.image_url IS NULL").where("things.id >= #{start_id} and things.deleted = ?", false).
-                where("file_updated IS NULL or file_updated < ?", DateTime.now.utc - 2.weeks)
+                where("file_updated IS NULL or file_updated < ?", DateTime.now.utc - 2.weeks).order("id asc")
 
     end_id = args[:end_id].to_i || 0  
     thingquery = thingquery.where("things.id <= #{end_id}") if end_id > 0
     Rails.logger.info("Starting ID #{start_id}")
+    # Rails.logger.info(thingquery.count())
+    # exit!
     cnt = 0
     hasMore = true
     while hasMore
@@ -263,7 +265,7 @@ namespace :things do
     offset = 0
     thingquery = ThingFile.joins("left join model_version_images on model_version_images.thing_file_id = thing_files.id and model_version_images.model_version_id = #{model_version.id}").
                 where("thing_files.thing_id >= #{start_id}").where("image_url IS NOT NULL and image_url != ''").                
-                where("model_version_images.id IS NULL")
+                where("model_version_images.id IS NULL").order("id asc")
     end_id = args[:end_id].to_i || 0  
     thingquery = thingquery.where("thing_files.thing_id <= #{end_id}") if end_id > 0
 
