@@ -157,8 +157,8 @@ namespace :things do
     job = Job.last
     # start_id = 196
     start_id = args[:start].to_i || 0 #356 #2705
-    end_id  = start_id + 25000
-    end_id = args[:end_id].to_i if args[:end_id]
+    # end_id  = start_id + 25000
+    end_id = args[:end_id].to_i || start_id + 25000
     # start_id = 1196
     # end_id  = start_id + 804 #1000
     currentID = start_id
