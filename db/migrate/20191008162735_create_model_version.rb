@@ -17,7 +17,7 @@ class CreateModelVersion < ActiveRecord::Migration[5.2]
       t.timestamps
     end
     add_index :model_version_images, [:model_version_id, :index], unique: true
-    add_index :model_version_images, [:model_version_id, :thing_file_id], unique: true
+    add_index :model_version_images, [:model_version_id, :thing_file_id], unique: true, :name => 'index_model_version_images_on_model_version_and_thing_file'
   end
 end
    
