@@ -41,7 +41,7 @@ export default class Things extends React.Component {
   }
 
   componentDidMount(){
-    tf.io.removeModel(`indexeddb://pluck-model-1`);
+    // tf.io.removeModel(`indexeddb://pluck-model-1`);
     this.loadLatestModel();
     this.loadThings()
     
