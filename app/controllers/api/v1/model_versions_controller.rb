@@ -92,6 +92,12 @@ class Api::V1::ModelVersionsController < ApplicationController
     # end
   end
 
+
+  def latest
+    mv = ModelVersion.where(active: true, deleted: false).order("version DESC").first
+    render status: 200, json: mv || {}
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_model_version

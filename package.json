@@ -1,5 +1,5 @@
 {
-  "name": "thingsearch",
+  "name": "pluck",
   "private": true,
   "dependencies": {
     "@babel/preset-react": "^7.0.0",

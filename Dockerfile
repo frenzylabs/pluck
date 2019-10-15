@@ -7,7 +7,7 @@ RUN npm install yarn --global
 
 
 # Set an environment variable where the Rails app is installed to inside of Docker image
-ENV RAILS_ROOT ${RAILS_ROOT:-/var/www/thingsearch}
+ENV RAILS_ROOT ${RAILS_ROOT:-/var/www/pluck}
 ENV APP_DIR=${RAILS_ROOT}/app
 
 RUN mkdir -p $RAILS_ROOT 

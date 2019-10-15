@@ -9,6 +9,10 @@ defaults: &defaults
     region: <%= ENV.fetch('DIGITALOCEAN_REGION') { "sfo2" } %> 
     bucket: <%= ENV.fetch('DIGITALOCEAN_BUCKET') { "layerkeep-dev" } %>
     endpoint: <%= ENV.fetch('DIGITALOCEAN_ENDPOINT') { "https://sfo2.digitaloceanspaces.com" } %>  
+  env:
+    domains:
+      thingiverse: <%= ENV.fetch('THINGIVERSE_DOMAIN') { "http://thingiverse.com" } %> 
+      layerkeep: <%= ENV.fetch('LAYERKEEP_DOMAIN') { "http://layerkeep.dev" } %> 
 
 development:
   <<: *defaults

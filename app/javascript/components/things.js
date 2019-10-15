@@ -18,6 +18,7 @@ export default class Things extends React.Component {
     var qparams = qs.parse(this.props.location.search, { ignoreQueryPrefix: true })
 
     this.state = {
+      model_version: 0,
       things: [],
       search: {
         page: parseInt(qparams["page"] || 1), 
@@ -27,31 +28,46 @@ export default class Things extends React.Component {
       searchTerm: qparams["q"] || ""
     };
 
-    this.loadThings   = this.loadThings.bind(this)
-    this.searchChange = this.searchChange.bind(this)
-    this.searchThings = this.searchThings.bind(this)
-    this.onPageChange = this.onPageChange.bind(this)
+    this.loadThings       = this.loadThings.bind(this)
+    this.loadLatestModel  = this.loadLatestModel.bind(this)
+    this.searchChange     = this.searchChange.bind(this)
+    this.searchThings     = this.searchThings.bind(this)
+    this.onPageChange     = this.onPageChange.bind(this)
 
     this.imageInputRef = React.createRef();
     window.t = this
     window.tf = tf;
+    
   }
 
   componentDidMount(){
-    this.loadModel();
+    tf.io.removeModel(`indexeddb://pluck-model-1`);
+    this.loadLatestModel();
     this.loadThings()
+    
+  }
+
+  loadLatestModel() {
+    fetch('/api/v1/model_versions/latest.json')
+      .then((response) => { return response.json()})
+      .then((data) => {
+        if (data.version && data.version > 0) {
+          this.setState({model_version: data.version})
+          this.loadModel()
+        }
+      });
   }
 
   async loadModel() {
     this.model = new Promise((resolve, reject) => {
-      var amodel = tf.loadLayersModel('indexeddb://thing-model1');
+      var amodel = tf.loadLayersModel(`indexeddb://pluck-model-${this.state.model_version}`);
       amodel.then((data) => {
         resolve(data)
       }).catch((error) => {
         console.log(error)
-        var bmodel = tf.loadLayersModel('/api/v1/model_versions/1/model.json')
+        var bmodel = tf.loadLayersModel(`/api/v1/model_versions/${this.state.model_version}/model.json`)
         bmodel.then((data) => {
-          data.save('indexeddb://thing-model1');
+          data.save(`indexeddb://pluck-model-${this.state.model_version}`);
         })
         return resolve(bmodel)
       });
@@ -247,11 +263,11 @@ export default class Things extends React.Component {
               <Label>{thing.attributes.name}</Label>
             </div>
             <Menu>
-              <Menu.Item link={true} as={"a"} target="_blank" href={`http://thingiverse.com/thing:${thing.attributes.thingiverse_id}`}>
+              <Menu.Item link={true} as={"a"} target="_blank" href={`${window.currentEnv.domains.thingiverse}/thing:${thing.attributes.thingiverse_id}`}>
                 <span>Visit</span>
               </Menu.Item>
 
-              <a className={"link"} target="_blank" href={`https://layerkeep.dev/projects/new?source=thingiverse&thing_id=${thing.attributes.thingiverse_id}`}>
+              <a className={"link"} target="_blank" href={`${window.currentEnv.domains.layerkeep}/projects/new?source=thingiverse&thing_id=${thing.attributes.thingiverse_id}`}>
                 <span>Manage On Layerkeep</span>
               </a>
             </Menu>
