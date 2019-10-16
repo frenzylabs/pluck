@@ -59,12 +59,12 @@ export default class Things extends React.Component {
 
   async loadModel() {
     this.model = new Promise((resolve, reject) => {
-      var amodel = tf.loadLayersModel(`indexeddb://pluck-models-${this.state.model_version}`, false);
+      var amodel = tf.loadLayersModel(`indexeddb://pluck-models-${this.state.model_version}`);
       amodel.then((data) => {
         resolve(data)
       }).catch((error) => {
         console.log(error)
-        var bmodel = tf.loadLayersModel(`/api/v1/model_versions/${this.state.model_version}/model.json`, false)
+        var bmodel = tf.loadLayersModel(`/api/v1/model_versions/${this.state.model_version}/model.json`)
         bmodel.then((data) => {
           data.save(`indexeddb://pluck-models-${this.state.model_version}`);
         })
