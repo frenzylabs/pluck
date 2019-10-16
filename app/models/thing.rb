@@ -1,5 +1,6 @@
 class Thing < ApplicationRecord
   include Searchable
+  index_name    "things2"
 
   belongs_to :job, optional: true
   belongs_to :user
@@ -13,11 +14,7 @@ class Thing < ApplicationRecord
   has_many :thing_files
 
   has_many :model_version_images
-  
 
-  # mapping do
-  #   indexes :name
-  # end
 
   def as_indexed_json(options={})
     self.as_json(

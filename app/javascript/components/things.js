@@ -141,7 +141,7 @@ export default class Things extends React.Component {
       },
       redirect: 'follow', // manual, *follow, error
       referrer: 'no-referrer', // no-referrer, *client
-      body: JSON.stringify({indices: this.indices}) // body data type must match "Content-Type" header
+      body: JSON.stringify({indices: data}) // body data type must match "Content-Type" header
     })
     .then((response) => { return response.json()})
     .then((data) => {

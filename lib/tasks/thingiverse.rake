@@ -150,33 +150,66 @@ namespace :things do
     end
   end
 
-  task :details, [:start, :end_id] => :environment do |t, args|
+  task :details, [:start_id, :end_id] => :environment do |t, args|
+    
     Rails.logger = Logger.new(STDOUT)
     Rails.logger.level = Logger::INFO
-    params = {page: 1}
+    trap('SIGINT') { puts "KILLED IT"; exit! }
+
     job = Job.last
-    # start_id = 196
-    start_id = args[:start].to_i || 0 #356 #2705
-    end_id  = start_id + 25000
-    end_id = args[:end_id].to_i if args[:end_id]
-    # start_id = 1196
-    # end_id  = start_id + 804 #1000
-    currentID = start_id
-    begin
-      Thing.where("id >= #{start_id}").where("id < #{end_id}").where("like_count = 0").where("description IS NULL").each do |thing|
-        currentID = thing.id
-        thing.job = job
-        res = create_details(thing, params, [:tags, :files, :categories] )
-        if !res.key?(:error) && thing.save
-          puts "Updated thing #{thing.id}"
+
+    params = {page: 1}
+    last_id = start_id = args[:start_id].to_i || 0    
+    batch_size = 200
+    offset = 0
+    thingquery = Thing.where("id >= #{start_id}").where("like_count = 0").where("description IS NULL").
+                  where("job_id IS NULL or job_id != #{job.id}").order("id asc")
+
+    end_id = args[:end_id].to_i || 0  
+    thingquery = thingquery.where("things.id <= #{end_id}") if end_id > 0
+    Rails.logger.info("Starting ID #{start_id}")
+    # Rails.logger.info(thingquery.count())
+    # exit!
+    cnt = 0
+    hasMore = true
+    while hasMore
+      hasMore = false
+      cnt += 1
+      Rails.logger.info("Starting Cnt #{cnt} lastid: #{last_id}, :offset: #{offset} - #{start_id + offset}")
+      thingids = []
+      docs = thingquery.limit(batch_size).offset(offset).each do |t|
+        t.job_id = job.id
+        t.updated_at = DateTime.now.utc
+        fresp = create_details(t)
+        
+
+        if fresp[:not_found]
+          t.deleted = true
+          t.updated_at = DateTime.now.utc
+          t.save
         else
-          puts "Failed thing #{thing.id}:  #{res}: #{thing.errors}"
+          thingids << t.id  if !fresp[:error]
+          last_id = [last_id, t.id].max
         end
-        # binding.pry
+
+        ratelimit = (fresp[:headers] && fresp[:headers]["x-ratelimit-remaining"] && fresp[:headers]["x-ratelimit-remaining"].to_i) || -1
+        if fresp[:calm]
+          Rails.logger.info("RateLimit Calming Sleep #{ratelimit}")
+          sleep(45)
+        elsif ratelimit >= 0 && ratelimit < 3
+          Rails.logger.info("RateLimit Sleep #{ratelimit}")
+          sleep(30)
+        end
+        # t.thing_files
       end
-    rescue => e
-      puts "Failed on id: #{currentID}"
-      raise
+      
+      # Thing.where(id: thingids).update_all(file_updated: DateTime.now.utc)  if thingids.count > 0
+      # Rails.logger.info("Doccnt = #{docs.count}")
+      # {|t| t.__elasticsearch__.index_document }.count
+      if docs.count == batch_size
+        offset += batch_size
+        hasMore = true
+      end
     end
   end
 
@@ -382,7 +415,7 @@ end
 
 # end
 
-def create_details(thing, params, includes = [])
+def create_details(thing, params = {}, includes = [])
   path = "/things/#{thing.thingiverse_id}"
   resp = fetch_from_thingiverse(path, params)
   if resp[:error]
@@ -396,21 +429,24 @@ def create_details(thing, params, includes = [])
       # sthing = Thing.find_or_initialize_by(:thingiverse_id => thingresp["id"])
       thing.assign_attributes(build_thing(thingresp, thing))
       if thing.valid?
-        if includes.include?(:files)
-          fresp = fetch_thing_files(thing)  
-        end
-        if includes.include?(:tags)
-          fresp = fetch_thing_tags(thing)  
-        end
-        if includes.include?(:categories)
-          fresp = fetch_thing_categories(thing)  
-        end
+        thing.save
+        # if includes.include?(:files)
+        #   fresp = fetch_thing_files(thing)  
+        # end
+        # if includes.include?(:tags)
+        #   fresp = fetch_thing_tags(thing)  
+        # end
+        # if includes.include?(:categories)
+        #   fresp = fetch_thing_categories(thing)  
+        # end
         
+        return {headers: resp.headers, success: true, errors: thing.errors }
       else
           puts ("Failed Updating Thing #{thing["id"]} #{sthing.errors}")
+          return {headers: resp.headers, success: 0, errors: thing.errors }
       end
     end
-    return {success: thing.valid?}
+    return {headers: resp.headers, success: 0, failed: [] }
   end
 end
 
