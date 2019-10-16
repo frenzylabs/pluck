@@ -1,0 +1,71 @@
+//
+//  _fonts.scss
+//  pluck
+// 
+//  Created by Wess Cope (me@wess.io) on 10/15/19
+//  Copyright 2019 Wess Cope
+//
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/Fontfabric - Nexa Regular.otf');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/Fontfabric - Nexa Regular Italic.otf');
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/Fontfabric - Nexa Thin.otf');
+  font-weight: lighter;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/Fontfabric - Nexa Thin Italic.otf');
+  font-weight: lighter;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/Fontfabric - Nexa Bold.otf');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/Fontfabric - Nexa Bold Italic.otf');
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/Fontfabric - Nexa XBold.otf');
+  font-weight: bolder;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('/assets/Fontfabric - Nexa XBold Italic.otf');
+  font-weight: bolder;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'NexaBook';
+  src: url('/assets/Fontfabric - Nexa Book.otf');
+  font-weight: bolder;
+}
+
+@font-face {
+  font-family: 'NexaBook';
+  src: url('/assets/Fontfabric - Nexa Book Italic.otf');
+  font-weight: bolder;
+  font-style: italic;
+}

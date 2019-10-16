@@ -1,14 +1,35 @@
-import React              from 'react'
-import { Link }         from 'react-router-dom';
+//
+//  things.js
+//  pluck
+// 
+//  Created by Wess Cope (me@wess.io) on 10/15/19
+//  Copyright 2019 Wess Cope
+//
+
+import React from 'react'
 
 const qs = require('qs');
 
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs'
 
-import { Card, Segment, Header, Divider, Icon, Form, Input, Button, Menu, Grid, Image, Label } from 'semantic-ui-react'
-import { Pagination } from 'semantic-ui-react'
-import { InputFile } from 'semantic-ui-react-input-file'
-import FileDrop from 'react-file-drop';
+import { 
+  Card, 
+  Segment, 
+  Header, 
+  Divider, 
+  Icon, 
+  Form, 
+  Input, 
+  Button, 
+  Menu, 
+  Grid, 
+  Image, 
+  Label,
+  Pagination
+} from 'semantic-ui-react'
+
+import { InputFile }  from 'semantic-ui-react-input-file'
+import FileDrop       from 'react-file-drop'
  
 
 export default class Things extends React.Component {
@@ -90,10 +111,6 @@ export default class Things extends React.Component {
       this.props.history.push(`${url}`);
       this.loadThings();
     } 
-    // else {
-    //   console.log(JSON.stringify(this.state.search))
-    //   console.log(JSON.stringify(prevState.search))
-    // }
   }
 
   loadThings() {
