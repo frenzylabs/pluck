@@ -64,8 +64,6 @@ export default class ImageSearch extends React.Component {
           this.setState({
             model_version: data.version
           })
-
-          this.loadModel()
         }
       });
   }
