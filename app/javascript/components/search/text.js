@@ -45,7 +45,7 @@ export default class TextSearch extends React.Component {
     return (
       <React.Fragment>
         <Form onSubmit={this.submitAction}>
-          <Input icon='search' placeholder='Search for model...' size='small' onChange={this.changeAction} />
+          <Input fluid icon='search' placeholder='Search for model...' onChange={this.changeAction} />
         </Form>
       </React.Fragment>
     )
