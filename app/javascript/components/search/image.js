@@ -57,6 +57,7 @@ export default class ImageSearch extends React.Component {
   }
 
   loadLatestModel() {
+    
     fetch('/api/v1/model_versions/latest.json')
       .then((response) => { return response.json()})
       .then((data) => {

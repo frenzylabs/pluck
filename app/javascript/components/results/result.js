@@ -23,18 +23,11 @@ export default class Result extends React.Component {
 
 
   renderImage(url) {
-    var lurl = url.replace(/(thumb_)(medium)(\.)/, '$1large$3');
-
-    // return (
-    //   <Image 
-    //     src={`${lurl}`} 
-    //     onError={(ev) => ev.target.src = url } 
-    //   />
-    // )
+    let lurl = (url == null || url.length() == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
 
     return (
       <Image 
-        size='small' 
+        size='tiny'
         src={`${lurl}`} 
         wrapped 
         ui={false}
