@@ -27,7 +27,7 @@ export default class Results extends React.Component {
   renderItems() {
     return (this.props.items || []).map((item, index) => {
       return (
-        <Result key={index}/>        
+        <Result key={index} image={item.attributes.image} name={item.attributes.name} tid={item.attributes.thingiverse_id}/>        
       )
     })
   }

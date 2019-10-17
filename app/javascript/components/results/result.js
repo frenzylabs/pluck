@@ -15,19 +15,75 @@ import {
 } from 'semantic-ui-react'
 
 export default class Result extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.renderImage = this.renderImage.bind(this)
+  }
+
+
+  renderImage(url) {
+    var lurl = url.replace(/(thumb_)(medium)(\.)/, '$1large$3');
+
+    // return (
+    //   <Image 
+    //     src={`${lurl}`} 
+    //     onError={(ev) => ev.target.src = url } 
+    //   />
+    // )
+
+    return (
+      <Image 
+        size='small' 
+        src={`${lurl}`} 
+        wrapped 
+        ui={false}
+      />
+    )
+  }
+
+  renderThingiverse() {
+    return(
+      <Button
+        size='small'
+        compact
+        as='a'
+        target='_blank'
+        href={`${window.currentEnv.domains.thingiverse}/thing:${this.props.tid}`}
+      >
+        Thingiverse
+      </Button>
+    )
+  }
+
+  renderLayerKeep() {
+    return(
+      <Button
+        size='small'
+        compact
+        primary
+        as='a'
+        target='_blank'
+        href={`${window.currentEnv.domains.layerkeep}/projects/new?source=thingiverse&thing_id=${this.props.tid}`}
+      >
+        LayerKeep
+      </Button>
+    )
+  }
+
   render() {
     return (
       <Card>
-        <Image size='small' src='https://cdn.thingiverse.com/renders/1f/4a/34/a8/29/3a0ad421fde6574a2f0c16445e944d0e_thumb_large.jpg' wrapped ui={false}/>
+        {this.renderImage(this.props.image)}
         <Card.Content>
           <Card.Description>
-            Description
+            {this.props.name}
           </Card.Description>
         </Card.Content>
         <Card.Content extra>
           <Button.Group fluid>
-            <Button basic size='small' color='grey'  compact>Thingiverse</Button>
-            <Button basic size='small' color='blue'  compact>LayerKeep</Button>
+            {this.renderLayerKeep()}
+            {this.renderThingiverse()}
           </Button.Group>
         </Card.Content>
       </Card>
