@@ -73,7 +73,8 @@ export default class ImageSearch extends React.Component {
     if(this.state.model_version < 1) { return }
 
     this.setState({
-      loading: true
+      loading: true,
+      disabled: false
     })
 
     this.model = new Promise((resolve, reject) => {
@@ -91,14 +92,14 @@ export default class ImageSearch extends React.Component {
         })
 
         return resolve(bmodel)
-      }).finally(() => {
-        this.setState({
-          loading: false
-        })
       })
 
       return amodel
-    });
+    }).finally(() => {
+      this.setState({
+        loading: false
+      })
+    })
   }
 
   async searchImage(img) {

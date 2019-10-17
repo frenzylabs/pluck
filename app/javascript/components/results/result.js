@@ -23,11 +23,10 @@ export default class Result extends React.Component {
 
 
   renderImage(url) {
-    let lurl = (url == null || url.length() == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
+    let lurl = (url == null || url.length == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
 
     return (
       <Image 
-        size='tiny'
         src={`${lurl}`} 
         wrapped 
         ui={false}
@@ -38,7 +37,7 @@ export default class Result extends React.Component {
   renderThingiverse() {
     return(
       <Button
-        size='small'
+        size='tiny'
         compact
         as='a'
         target='_blank'
@@ -52,7 +51,7 @@ export default class Result extends React.Component {
   renderLayerKeep() {
     return(
       <Button
-        size='small'
+        size='tiny'
         compact
         primary
         as='a'
@@ -66,14 +65,14 @@ export default class Result extends React.Component {
 
   render() {
     return (
-      <Card>
+      <Card style={{width: '220px'}}>
         {this.renderImage(this.props.image)}
         <Card.Content>
           <Card.Description>
             {this.props.name}
           </Card.Description>
         </Card.Content>
-        <Card.Content extra>
+        <Card.Content extra style={{padding: '10px', margin: 0}}>
           <Button.Group fluid>
             {this.renderLayerKeep()}
             {this.renderThingiverse()}
