@@ -22,7 +22,7 @@ class Api::V1::ModelVersionsController < ApplicationController
   # GET /things/1
   # GET /things/1.json
   def show
-    redirect_to Shrine.storages[:store].url("models/#{@model_version.id}/artifacts/#{params["filepath"]}")
+    redirect_to Shrine.storages[:store].url("models/#{@model_version.id}/artifacts4/#{params["filepath"]}")
   end
 
   def things
