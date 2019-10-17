@@ -44,6 +44,10 @@ export default class Master extends React.Component {
     this.searchTerm     = this.searchTerm.bind(this)
   }
 
+  componentDidMount() {
+    this.loadThings()
+  }
+  
   componentDidUpdate(prevProps, prevState) {
     if (this.props.location.search != prevProps.location.search) {
       var qparams = qs.parse(this.props.location.search, { ignoreQueryPrefix: true })

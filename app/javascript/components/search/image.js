@@ -49,6 +49,7 @@ export default class ImageSearch extends React.Component {
     this.renderSelect       = this.renderSelect.bind(this)
     this.handleDrop         = this.handleDrop.bind(this)
     this.onFileChange       = this.onFileChange.bind(this)
+    this.renderNothing      = this.renderNothing.bind(this)
   }
 
   componentDidMount() {
@@ -60,13 +61,18 @@ export default class ImageSearch extends React.Component {
       .then((response) => { return response.json()})
       .then((data) => {
         if (data.version && data.version > 0) {
-          this.setState({model_version: data.version})
+          this.setState({
+            model_version: data.version
+          })
+
           this.loadModel()
         }
       });
   }
 
   async loadModel() {
+    if(this.state.model_version < 1) { return }
+
     this.setState({
       loading: true
     })
@@ -206,7 +212,7 @@ export default class ImageSearch extends React.Component {
         </Card.Content>
 
         <Card.Content extra>
-          <Button fluid color='yellow'>Enable</Button>
+          <Button fluid color='yellow' onClick={this.loadModel}>Enable</Button>
         </Card.Content>
       </Card>
     )
@@ -251,8 +257,15 @@ export default class ImageSearch extends React.Component {
     )
   }
 
+  renderNothing() {
+    return (
+      <React.Fragment>
+        &nbsp;
+      </React.Fragment>
+    )
+  }
   
   render() {
-    return this.state.disabled ? this.renderDisabled() : this.renderSelect()
+    return this.state.model_version > 0 ? (this.state.disabled ? this.renderDisabled() : this.renderSelect()) : this.renderNothing()
   }
 }
