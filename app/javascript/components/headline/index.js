@@ -17,75 +17,46 @@ import {
   Card,
   Input,
   Button,
-  Divider
+  Divider,
+  Header,
+  Segment
 } from 'semantic-ui-react'
 
 export default class Headline extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
   render() {
     return (
-      <Container fluid id="headline">
-        <Menu size='huge' borderless>
-          <Container fluid style={{padding: '0 20px'}}>
-            <Menu.Item as='a' header>
-              <Image size="mini" src="/assets/pluck-logo.svg" avatar />
-              <span style={{fontFamily: 'Nexa'}}>&nbsp;Pluck</span>
-            </Menu.Item>
+      <Container fluid className="mobile tablet only">
+        <Card fluid>
+          <Card.Content>
+            <Grid stretched columns='equal'>
+              <Grid.Column width={2}>
+                <Image size="mini" src="/assets/pluck-logo.svg"/>
+              </Grid.Column>
 
-            <Menu.Menu position='right'>
-              <Menu.Item as='a'>
-                About
-              </Menu.Item>
+              <Grid.Column>
+                <Input icon='search' placeholder='Search...' style={{width: '100%'}} />
+              </Grid.Column>
+            </Grid>
+          </Card.Content>
 
-              <Menu.Item as='a'>
-                Contact
-              </Menu.Item>
-            </Menu.Menu> 
+          <Card.Content>
+            <Grid stretched columns='equal'>
+              <Grid.Column>
+                <p>Or select an image to find similiar models</p>
+              </Grid.Column>
 
-          </Container>
-        </Menu>
+              <Grid.Column>
+                <Button primary>Select</Button>
+              </Grid.Column>
+            </Grid>
+          </Card.Content>
 
-        <Container fluid style={{padding: '0 4em 4em 4em'}}>
-          <Card fluid id="search-card">
-            <Card.Content style={{border: 'none', boxShadow: '0'}}>
-              <Grid columns='equal' stretched>                      
-                <Grid.Column>
-                  <Input
-                    fluid
-                    size='large' 
-                    placeholder='Search for...'
-                    icon='search'
-                    iconPosition='left'
-                    style={{border: 'none'}}
-                  />
-                </Grid.Column>
-
-                <Grid.Column width={2}>
-                  <Button color='green'>
-                    Search
-                  </Button>
-                </Grid.Column>
-
-                <Grid.Column width={1}>
-                  <Divider vertical>OR</Divider>
-                </Grid.Column>
-
-                <Grid.Column width={2}>
-                  <p style={{fontSize: '13px', margin: 0, padding: 0}}>
-                    Select image to 
-                    find similar models.
-                  </p>
-                </Grid.Column>
-
-                <Grid.Column width={2}>
-                  <Button color='green'>
-                    Select Image
-                  </Button>
-                </Grid.Column>
-
-                </Grid>
-            </Card.Content>
-          </Card>
-        </Container>
+        </Card>
       </Container>
     )
   }

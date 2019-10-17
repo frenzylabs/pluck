@@ -2,13 +2,16 @@
 <html>
   <head>
     <title>Pluck</title>
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag     'application' %>
-
+    
+    <meta name="viewport" content="width=800">
+    
     <script>
       window.currentEnv = <%= (current_env && raw(current_env.to_json)) || {"domains": {"thingiverse": "https://thingiverse.com", "layerkeep": "https://layerkeep.com"}} %>
     </script>

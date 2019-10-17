@@ -8,9 +8,16 @@ import {
   Grid, 
   Image, 
   Label, 
-  Container 
+  Container, 
+  Menu,
+  Item,
+  Button,
+  Input,
+  Card,
+  Advertisement
 } from 'semantic-ui-react'
 
+import Master   from './components/master'
 import Headline from './components/headline'
 import Results  from './components/results'
 import Footer   from './components/footer'
@@ -19,43 +26,42 @@ import Things   from './components/things.js'
 export class App extends React.Component {
   constructor(props) {
      super(props)
+
+      this.state = {
+        results: []
+      }
+
+     this.updateResults = this.updateResults.bind(this)
+  }
+
+  updateResults(results) {
+    this.setState({
+      results: results
+    })
   }
 
   render() {
     return (
-      <React.Fragment>
-        <Headline />
-        <Results/>
-        <Footer/>
-      </React.Fragment>
+      <Container fluid id="master-detail">
+        <Grid stretched columns='equal' className="main-content">
+            <Grid.Column width={3} id="left-menu" only='computer'>
+              <Master {...this.props} updateResults={this.updateResults} />
+            </Grid.Column>
+
+            <Grid.Column id="master-content">
+              <Headline/>
+
+
+              <Container fluid style={{overflowX: 'hidden', overflowY: 'auto', height:'100%', minHeight: '100%'}}>
+                <div style={{padding: '40px 0'}}>
+                  <Results {...this.props} items={this.state.results} />
+                </div>
+              </Container>
+            </Grid.Column>
+        </Grid>
+      </Container>
     )
   }
 }
 
 export default withRouter(App)
-
-/*
-<div className={"container"}>
-<Header as='h1' inverted textAlign='center' style={{marginTop: '20px'}}>
-  Search for 3D Models
-  <Header.Subheader>
-    
-  </Header.Subheader>
-</Header>
-<Divider />
-<Grid container celled='internally' columns={3} className="center aligned">
-  <Grid.Row>
-    <Grid.Column width={2}>
-      
-    </Grid.Column>
-    <Grid.Column width={10}>
-      <Things {...this.props} />    
-    </Grid.Column>
-    <Grid.Column width={2}>
-    </Grid.Column>
-  </Grid.Row>
-</Grid>
-
-
-</div>
-*/

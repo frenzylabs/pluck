@@ -25,13 +25,7 @@ export default class Results extends React.Component {
   }
 
   renderItems() {
-
-    var items = []
-    for(var i = 0; i < 20; i++) {
-      items.push(i)
-    }
-
-    return items.map((item, index) => {
+    return (this.props.items || []).map((item, index) => {
       return (
         <Result key={index}/>        
       )
@@ -40,35 +34,28 @@ export default class Results extends React.Component {
 
   render() {
     return (
-      <Container id="results">
-        <Grid>
-          <Grid.Column width={14}>
-            <Card.Group itemsPerRow={4}>
-              {this.renderItems()}
-            </Card.Group>
+      <Container fluid id="results">
+        <Container style={{paddingBottom: '100px'}}>
+          <br/><br/>
 
-            <br/>
-            <br/>
-                        
-            <Grid centered>
-              <Grid.Column width={4}>
-                <Pagination
-                  boundaryRange={0}
-                  defaultActivePage={1}
-                  ellipsisItem={null}
-                  firstItem={null}
-                  lastItem={null}
-                  siblingRange={1}
-                  totalPages={10}
-                />
-              </Grid.Column>
-            </Grid>
-          </Grid.Column>
+          <Card.Group centered>
+            {this.renderItems()}
+          </Card.Group>
 
-          <Grid.Column>
-            right
-          </Grid.Column>
-        </Grid>
+          <Card.Group centered>
+            <Pagination
+              boundaryRange={0}
+              defaultActivePage={1}
+              ellipsisItem={null}
+              firstItem={null}
+              lastItem={null}
+              siblingRange={1}
+              totalPages={10}
+            />
+          </Card.Group>
+
+          <br/><br/>
+        </Container>
       </Container>
     )
   }
