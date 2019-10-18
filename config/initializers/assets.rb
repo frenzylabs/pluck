@@ -17,4 +17,4 @@ Rails.application.config.assets.paths << Rails.root.join('vendor')
 # Rails.application.config.assets.paths += Dir["#{Rails.root}/vendor/**/*"].sort_by { |dir| -dir.size }
 # Rails.application.config.assets.precompile << %r{themes/assets/.*$}
 
-Rails.application.config.assets.precompile << /\.(?:svg|eot|woff|ttf)\z/
+Rails.application.config.assets.precompile << /\.(?:svg|eot|woff|ttf|otf)\z/

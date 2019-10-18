@@ -32,7 +32,34 @@ export default class Results extends React.Component {
     })
   }
 
+
+  renderPagination() {
+    if (this.props.kind == "text") {
+      var activePage = this.props.search.page || 1
+      var perPage = this.props.search.per_page || 20
+      var totalPages = activePage
+      if (this.props.items.length >= perPage) {
+        totalPages = activePage + 1
+      }
+      return (
+        <Pagination
+          boundaryRange={0}
+          defaultActivePage={activePage}
+          ellipsisItem={null}
+          firstItem={null}
+          lastItem={null}
+          siblingRange={1}
+          totalPages={totalPages}
+          onPageChange={this.props.onPageChange}
+          style={{"margin": "20px"}}
+        />
+      )
+    }
+  }
+
   render() {
+    
+
     return (
       <Container fluid id="results">
         <Container style={{paddingBottom: '100px'}}>
@@ -43,15 +70,7 @@ export default class Results extends React.Component {
           </Card.Group>
 
           <Card.Group centered>
-            <Pagination
-              boundaryRange={0}
-              defaultActivePage={1}
-              ellipsisItem={null}
-              firstItem={null}
-              lastItem={null}
-              siblingRange={1}
-              totalPages={10}
-            />
+            {this.renderPagination()}
           </Card.Group>
 
           <br/><br/>

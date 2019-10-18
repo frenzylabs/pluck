@@ -7,7 +7,6 @@
 //
 
 import React    from 'react'
-import * as tf  from '@tensorflow/tfjs'
 
 const qs = require('qs');
 
@@ -24,6 +23,7 @@ import {
 import { InputFile }  from 'semantic-ui-react-input-file'
 import FileDrop       from 'react-file-drop'
 
+import placeHolder from 'images/image-placeholder.png'
 
 export default class ImageSearch extends React.Component {
   constructor(props) {
@@ -31,33 +31,31 @@ export default class ImageSearch extends React.Component {
 
     this.state = {
       model_version:  0,
-      disabled:       true,
+      disabled:       false,
       loading:        false,
-      imageSrc:       "/assets/image-placeholder.png"
+      imageSrc:       placeHolder
     }
 
-    window.t  = this
-    window.tf = tf;
-
     this.loadLatestModel    = this.loadLatestModel.bind(this)
-    this.loadModel          = this.loadModel.bind(this)
-    this.searchImage        = this.searchImage.bind(this)
-    this.loadSearchResults  = this.loadSearchResults.bind(this)
-    this.enableAction       = this.enableAction.bind(this)
-    this.renderDisabled     = this.renderDisabled.bind(this)
     this.renderLoading      = this.renderLoading.bind(this)
     this.renderSelect       = this.renderSelect.bind(this)
     this.handleDrop         = this.handleDrop.bind(this)
     this.onFileChange       = this.onFileChange.bind(this)
     this.renderNothing      = this.renderNothing.bind(this)
+    this.handleFileChange   = this.handleFileChange.bind(this)
   }
 
   componentDidMount() {
     this.loadLatestModel()
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.activeSrc != prevProps.activeSrc && this.props.activeSrc != "image") {
+      this.setState({imageSrc: placeHolder})
+    }
+  }
+
   loadLatestModel() {
-    
     fetch('/api/v1/model_versions/latest.json')
       .then((response) => { return response.json()})
       .then((data) => {
@@ -67,93 +65,6 @@ export default class ImageSearch extends React.Component {
           })
         }
       });
-  }
-
-  async loadModel() {
-    if(this.state.model_version < 1) { return }
-
-    this.setState({
-      loading: true,
-      disabled: false
-    })
-
-    this.model = new Promise((resolve, reject) => {
-      var amodel = tf.loadLayersModel(`indexeddb://pluck-models-${this.state.model_version}`);
-
-      amodel.then((data) => {
-        resolve(data)
-      }).catch((error) => {
-        console.log(error)
-
-        var bmodel = tf.loadLayersModel(`/api/v1/model_versions/${this.state.model_version}/model.json`)
-
-        bmodel.then((data) => {
-          data.save(`indexeddb://pluck-models-${this.state.model_version}`);
-        })
-
-        return resolve(bmodel)
-      })
-
-      return amodel
-    }).finally(() => {
-      this.setState({
-        loading: false
-      })
-    })
-  }
-
-  async searchImage(img) {
-    const raw           = tf.browser.fromPixels(img)
-    const resized       = tf.image.resizeBilinear(raw, [224, 224])
-    const expanded      = resized.expandDims(0)
-    const prediction    = await this.model.then(model => model.predict(expanded))
-    const similarities  = await prediction.array()
-
-    this.indices = similarities[0]
-      .map((val, index) => {return {index, val}})
-      .sort((a, b) => {return a.val < b.val ? 1 : -1 })
-      .map(o => o.index)
-
-    this.state.search.page = 1
-
-    var url = qs.stringify(this.state.search, { addQueryPrefix: true });
-
-    this.props.history.push(`${url}`);
-    this.loadSearchResults()
-
-    raw.dispose()
-    resized.dispose()
-    expanded.dispose()
-    prediction.dispose()
-  }
-
-  loadSearchResults() {
-    const page  = this.props.page || 1
-    const url   = "/api/v1/model_versions/1/things.json"
-    var data    = this.indices.slice((page - 1) * 100, 100)
-.
-    fetch(url, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      redirect: 'follow',
-      referrer: 'no-referrer',
-      body: JSON.stringify({indices: data})
-    })
-    .then((response) => { return response.json()})
-    .then((data) => {
-      if(this.props.updateImageResults) {
-        this.props.updateImageResults(data.data, page)
-      }
-    })
-  }
-
-  enableAction(e) {
-    if(this.state.disabled || this.state.model_version == 0) { return; }
-
-    this.loadModel()
   }
 
   renderImage(url) {
@@ -166,63 +77,57 @@ export default class ImageSearch extends React.Component {
   }
 
   handleFileChange(file) {
-    var reader = new FileReader()
-
-    reader.onload = async (file_load_event) => {
-      this.setState({imageSrc: file_load_event.target.result})
+    this.setState({
+      loading: true,
+    })
+    const formData = new FormData();
+    formData.append('image', file, file.name)
     
-      var readInImage = document.createElement("img")
-    
-      readInImage.onload = () => {
-        this.searchImage(readInImage)
+    if (FileReader && file) {
+      var fr = new FileReader();
+      fr.onload = async (file_load) => {
+        this.setState({imageSrc: fr.result})
       }
-    
-      readInImage.src = file_load_event.target.result  
+      fr.readAsDataURL(file);
     }
 
-    reader.readAsDataURL(file)
+    fetch(`/api/v1/model_versions/${this.state.model_version}/image_search`, { // Your POST endpoint
+      method: 'POST',
+      body: formData 
+    }).then(
+      response => response.json() // if the response is a JSON object
+    ).then((data) => {
+      if(this.props.updateImageResults) {
+        this.props.updateImageResults(data.data, 1)          
+      }
+      this.setState({
+        loading: false,
+      })
+      } // Handle the success response object
+    ).catch((error) => {
+        this.setState({
+          loading: false,
+        })
+        console.log(error)
+      }
+    );
   }
 
 
   onFileChange(evt) {
     if (evt.target.files.length > 0) {
       var file = evt.target.files[0]
-  
       this.handleFileChange(file)
     }
 
     evt.target.value = ""
   }
 
-  renderDisabled() {
-    return(
-      <Card>
-        <Card.Content textAlign='center' style={{background: '#eaeaea'}}>
-          <br/><br/>
-          <Icon name='lab' size='huge'/>
-          <br/><br/>
-        </Card.Content>
-
-        <Card.Content>
-          <Card.Description>
-              Smart object matching is currently in
-              an experimental state. If enabled we will
-              be loading a lot of data into your browser.
-          </Card.Description>
-        </Card.Content>
-
-        <Card.Content extra>
-          <Button fluid color='yellow' onClick={this.loadModel}>Enable</Button>
-        </Card.Content>
-      </Card>
-    )
-  }
-
   renderLoading() {
     return (
       <Dimmer active inverted>
         <Loader indeterminate>
-          This may take a while...
+          Comparing Images...
         </Loader>
       </Dimmer>
     )
@@ -234,7 +139,6 @@ export default class ImageSearch extends React.Component {
       <Card>
         {this.state.loading && this.renderLoading() }
 
-        
           <Image src={this.state.imageSrc}/>
 
           <Card.Content>
@@ -266,6 +170,6 @@ export default class ImageSearch extends React.Component {
   }
   
   render() {
-    return this.state.model_version > 0 ? (this.state.disabled ? this.renderDisabled() : this.renderSelect()) : this.renderNothing()
+    return this.state.model_version > 0 ? this.renderSelect() : this.renderNothing()
   }
 }

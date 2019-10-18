@@ -1,4 +1,7 @@
 defaults: &defaults
+  mlmodel: 
+    domain: <%= ENV.fetch('MODEL_SEARCH_DOMAIN') { "http://localhost:31112" } %>
+    searchpath: <%= ENV.fetch('MODEL_SEARCH_PATH') { "/function/search-images" } %>
   thingiverse:
     client_id: <%= ENV.fetch('THINGIVERSE_CLIENT') { "43395e7581ee2d8c2e7f" } %>
     client_secret: <%= ENV.fetch('THINGIVERSE_CLIENT_SECRET') { "e91444ed024f710c4ddd41dd32df00a3" } %>
@@ -8,7 +11,7 @@ defaults: &defaults
     secret_access_key: <%= ENV.fetch('DIGITALOCEAN_SECRET_ACCESS_KEY') { "3EnVkH/MNqLx8yQZ5MGjnI7tzMIoxo+iZVGo2s1oliY" } %>
     region: <%= ENV.fetch('DIGITALOCEAN_REGION') { "sfo2" } %> 
     bucket: <%= ENV.fetch('DIGITALOCEAN_BUCKET') { "layerkeep-dev" } %>
-    endpoint: <%= ENV.fetch('DIGITALOCEAN_ENDPOINT') { "https://sfo2.digitaloceanspaces.com" } %>  
+    endpoint: <%= ENV.fetch('DIGITALOCEAN_ENDPOINT') { "https://sfo2.digitaloceanspaces.com" } %>    
   env:
     domains:
       thingiverse: <%= ENV.fetch('THINGIVERSE_DOMAIN') { "http://thingiverse.com" } %> 

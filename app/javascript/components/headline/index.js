@@ -22,6 +22,8 @@ import {
   Segment
 } from 'semantic-ui-react'
 
+import logo from 'images/pluck-logo.svg'
+
 export default class Headline extends React.Component {
 
   constructor(props) {
@@ -35,7 +37,7 @@ export default class Headline extends React.Component {
           <Card.Content>
             <Grid stretched columns='equal'>
               <Grid.Column width={2}>
-                <Image size="mini" src="/assets/pluck-logo.svg"/>
+                <Image size="mini" src={logo} />
               </Grid.Column>
 
               <Grid.Column>
