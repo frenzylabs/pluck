@@ -16,18 +16,26 @@ module Searchable
             my_snow: {
               type: "snowball",
               language: "English"
+            },
+            my_stop: {
+              type:       "stop",
+              stopwords: "_english_"
             }
           },
           analyzer:{
+            my_english_analyzer: {
+              type: "standard",
+              stopwords: "_english_"
+            },
             snowball_analyzer: {
               type: "custom",
               tokenizer: "standard",
-              filter: ["lowercase", "my_snow"]
+              filter: ["lowercase", "my_stop", "my_snow"]
             },
             lowercase_analyzer: {
               type: "custom",
               tokenizer: "keyword",
-              filter: ["lowercase"]
+              filter: ["lowercase", "my_stop"]
             },
             camel_analyzer: {
               type: "pattern",
@@ -94,7 +102,7 @@ module Searchable
         indexes :name, type: :text, analyzer: :lowercase_analyzer do
           indexes :lower, analyzer: :snowball_analyzer
         end
-        indexes :description, type: :text, analyzer: :standard
+        indexes :description, type: :text, analyzer: :my_english_analyzer
         indexes :download_count, type: :integer
         indexes :like_count, type: :integer
         indexes :added_on, type: :date
@@ -114,6 +122,9 @@ module Searchable
           end
           indexes :download_count, type: :integer
         end
+        indexes :user, type: :object do
+          indexes :name, type: :text, analyzer: :keyword
+        end
       end
     end
 
@@ -123,6 +134,7 @@ module Searchable
       {
         query: {
           function_score: {
+              score_mode: "avg",
               query: {
                 bool: {
                   must: [
@@ -133,13 +145,20 @@ module Searchable
                           multi_match: {
                             query: query,
                             fields: ["name", "user.name"],
-                            boost: 3
+                            boost: 5
                           }
                         },
                         {
                           multi_match: {
                             query: query,
-                            fields: ["name.lower", "thing_files.name", "thing_files.name.exact", "tags.lname", "categories.name"]
+                            fields: ["name.lower", "thing_files.name", "thing_files.name.exact"],
+                            boost: 2
+                          }
+                        },
+                        {
+                          multi_match: {
+                            query: query, 
+                            fields: ["description", "tags.lname", "categories.name"]
                           }
                         }
                       ]
@@ -155,26 +174,26 @@ module Searchable
                           "origin": "#{dt}",
                           "scale": "84d",
                           "offset": "7d",
-                          "decay": 0.3
+                          "decay": 0.1
                       }
                   }
                 },
                 {
-                  gauss: {
-                    like_count: {
-                        origin: 5000,
-                        scale: 200
-                    }
+                  field_value_factor: {
+                    field: "like_count",
+                    factor: 1.1,
+                    modifier: "log1p",
+                    missing: 1
                   }
                 },
                 {
-                  gauss: {
-                    download_count: {
-                        origin: 500,
-                        scale: 200
-                    }
+                  field_value_factor: {
+                    field: "download_count",
+                    factor: 1.1,
+                    modifier: "log1p",
+                    missing: 1
                   }
-                }
+                }                
               ]
           }
         }
