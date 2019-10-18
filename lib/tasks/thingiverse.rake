@@ -16,6 +16,9 @@ namespace :things do
   task :recent, [:start] => :environment do |t, args|
     Rails.logger = Logger.new(STDOUT)
     Rails.logger.level = Logger::INFO
+
+    trap('SIGINT') { puts "KILLED IT"; exit! }
+
     startPage = args[:start].to_i || 1 #356 #2705
     
     params = {page: startPage, sort: :date, order: :desc}
@@ -26,8 +29,10 @@ namespace :things do
       hasMore = false
       # hasError = true
       res = create_things("/newest", params)
-      if res.key?(:error)
-        if res.key?(:retry) && res[:retry] < 15
+      
+
+      if res.key?(:error)  
+        if res.key?(:retry) && res[:retry] < 50
           hasMore = true
         else
           hasError = true
@@ -42,6 +47,15 @@ namespace :things do
         puts "retrying"
         retryCount += 1
         hasMore = true
+      end
+
+      ratelimit = (res[:headers] && res[:headers]["x-ratelimit-remaining"] && res[:headers]["x-ratelimit-remaining"].to_i) || -1
+      if res[:calm]
+        Rails.logger.info("RateLimit Calming Sleep #{ratelimit}")
+        sleep(45)
+      elsif ratelimit >= 0 && ratelimit < 3
+        Rails.logger.info("RateLimit Sleep #{ratelimit}")
+        sleep(30)
       end
     end
   end
@@ -691,7 +705,7 @@ def create_things(path, params)
         Rails.logger.info("Thing Res: Failed: #{res.failed_instances},  Num IDS: #{res.ids.count}, , Num Inserts: #{res.num_inserts}, ")
       end
     end
-    return {success: resp.body.length, thingiverse_ids: thingiverse_ids}
+    return {headers: resp.headers, success: resp.body.length, thingiverse_ids: thingiverse_ids}
   end
 end
 
