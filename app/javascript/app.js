@@ -142,6 +142,9 @@ export class App extends React.Component {
   }
 
   onPageChange(e, data) {
+    if (this.state.search.page < data.activePage) {
+      window.scrollTo(0, 0)
+    }
     this.setState({search: {...this.state.search, page: data.activePage}})
   }
 
@@ -161,30 +164,30 @@ export class App extends React.Component {
         <Menu.Item>
           <ImageSearch updateImageResults={this.updateImageResults} activeSrc={this.state.kind} page={1}/>
         </Menu.Item>
-
-        <Menu.Item>
-          <Advertisement unit='small square' style={{border: '1px solid #c0c0c0'}}>
-            <h4>AdverTitle</h4>
-            <p>This is something something something</p>
-          </Advertisement>
-        </Menu.Item>
       </Menu>
     )
   }
+
+//   <Menu.Item>
+//   <Advertisement unit='small square' style={{border: '1px solid #c0c0c0'}}>
+//     <h4>AdverTitle</h4>
+//     <p>This is something something something</p>
+//   </Advertisement>
+// </Menu.Item>
 
   render() {
     return (
       <Container fluid id="master-detail">
         <Grid stretched columns='equal' className="main-content">
-            <Grid.Column width={3} id="left-menu" only='computer'>
+            <Grid.Column width={3} id="left-menu" >
               {this.renderMenu()}
             </Grid.Column>
 
             <Grid.Column id="master-content">
-              <Headline/>
+              <h1 className="title" style={{textAlign: 'center'}}>Search for 3D Models</h1>
 
 
-              <Container fluid style={{overflowX: 'hidden', overflowY: 'auto', height:'100%', minHeight: '100%'}}>
+              <Container fluid style={{overflowX: 'auto', overflowY: 'auto', height:'100%', minHeight: '100%'}}>
                 <div style={{padding: '40px 0'}}>
                   <Results {...this.props} items={this.state.results} kind={this.state.kind} search={this.state.search} onPageChange={this.onPageChange} />
                 </div>

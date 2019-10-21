@@ -176,8 +176,8 @@ namespace :things do
     last_id = start_id = args[:start_id].to_i || 0    
     batch_size = 200
     offset = 0
-    thingquery = Thing.where("id >= #{start_id}").where("like_count = 0").where("description IS NULL").
-                  where("job_id IS NULL or job_id != #{job.id}").order("id asc")
+    thingquery = Thing.where("id >= #{start_id}").where("description IS NULL and deleted = false").order("id asc")
+                  # where("job_id IS NULL or job_id != #{job.id}").order("id asc")
 
     end_id = args[:end_id].to_i || 0  
     thingquery = thingquery.where("things.id <= #{end_id}") if end_id > 0

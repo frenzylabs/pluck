@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Pluck</title>
+    <title>Pluck - 3D Model Search</title>
     <%= favicon_link_tag asset_path('favicon.ico') %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -12,10 +12,12 @@
     
     <meta name="viewport" content="width=800">
     
+    <meta name="description" content="3D model files to help you start 3D printing">
+    
     <script>
       window.currentEnv = <%= (current_env && raw(current_env.to_json)) || {"domains": {"thingiverse": "https://thingiverse.com", "layerkeep": "https://layerkeep.com"}} %>
     </script>
-
+    <script data-ad-client="ca-pub-4928957416389056" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   </head>
 
   <body>
