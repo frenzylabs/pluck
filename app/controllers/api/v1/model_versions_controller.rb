@@ -74,7 +74,7 @@ class Api::V1::ModelVersionsController < ApplicationController
       if response.body["data"]
         dmi = response.body["data"].each_with_index.map {|val, index|  [index,  val] }
         sorted = dmi.sort {|a1,a2| a2[1] <=> a1[1] }
-        mindex = sorted[0...200].each_with_index.map { |m, i| "(#{m[0]}, #{i})"}.join(",")
+        mindex = sorted[0...300].each_with_index.map { |m, i| "(#{m[0]}, #{i})"}.join(",")
 
         # indexarr = response.body["data"][0...100]
         # mindex = indexarr.each_with_index.map {|m, i| "(#{m},#{i})" }.join(",")
@@ -82,7 +82,7 @@ class Api::V1::ModelVersionsController < ApplicationController
                   joins("INNER JOIN ( values #{mindex}) as x (index, ordering) ON model_version_images.index = x.index").
                   where("model_version_images.model_version_id = ?", @model_version.id).
                   group("things.id").order("imgorder").
-                  page(params[:page]).per(50).
+                  page(params[:page]).per(100).
                   includes(:categories, :tags, :user)
         ActiveRecord::Associations::Preloader.new.preload(things, :model_version_images, @model_version.images)
         options = {meta: { total: things.total_count, last_page: things.total_pages, current_page: things.current_page } }

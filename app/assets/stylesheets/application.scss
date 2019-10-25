@@ -148,4 +148,14 @@ body {
 
 #results {
   min-width: 510px;
+
+  .layerkeep-manage {
+    font-size: 13px;
+    flex: 1 1 auto;
+  }
+  .external-name {
+    display: flex;
+    align-items: center;
+  }
 }
+

@@ -41,9 +41,10 @@ export default class Result extends React.Component {
         compact
         as='a'
         target='_blank'
+        className='external-name'
         href={`${window.currentEnv.domains.thingiverse}/thing:${this.props.tid}`}
       >
-        Thingiverse
+        <span>Thingiverse</span>
       </Button>
     )
   }
@@ -56,9 +57,10 @@ export default class Result extends React.Component {
         primary
         as='a'
         target='_blank'
+        className="layerkeep-manage"
         href={`${window.currentEnv.domains.layerkeep}/projects/new?source=thingiverse&thing_id=${this.props.tid}`}
       >
-        LayerKeep
+        Manage on LayerKeep
       </Button>
     )
   }

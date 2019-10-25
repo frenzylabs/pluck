@@ -18,9 +18,12 @@ ActiveRecord::Schema.define(version: 2019_10_15_133907) do
 
   create_table "categories", force: :cascade do |t|
     t.citext "name"
-    t.string "url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "url"
+    t.bigint "parent_id"
+    t.index ["name"], name: "index_categories_on_name"
+    t.index ["parent_id"], name: "index_categories_on_parent_id"
   end
 
   create_table "category_things", force: :cascade do |t|
@@ -50,7 +53,8 @@ ActiveRecord::Schema.define(version: 2019_10_15_133907) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["model_version_id", "index"], name: "index_model_version_images_on_model_version_id_and_index", unique: true
-    t.index ["model_version_id", "thing_file_id"], name: "index_model_version_images_on_model_version_and_thing_file", unique: true
+    t.index ["model_version_id"], name: "index_model_version_images_on_model_version_id"
+    t.index ["thing_file_id"], name: "index_model_version_images_on_thing_file_id"
     t.index ["thing_id"], name: "index_model_version_images_on_thing_id"
   end
 
@@ -98,14 +102,14 @@ ActiveRecord::Schema.define(version: 2019_10_15_133907) do
     t.citext "name"
     t.integer "thingiverse_id"
     t.string "image_url"
-    t.text "description"
-    t.integer "like_count", default: 0
-    t.integer "download_count", default: 0
     t.datetime "added_on"
     t.datetime "updated_on"
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "description"
+    t.integer "like_count", default: 0
+    t.integer "download_count", default: 0
     t.bigint "job_id"
     t.boolean "deleted", default: false
     t.datetime "category_updated"
