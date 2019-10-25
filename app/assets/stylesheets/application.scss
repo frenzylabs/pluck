@@ -146,6 +146,10 @@ body {
   background: #f0f0f0;
 }
 
+.file-drop .ui .image {
+  object-fit: contain;
+}
+
 #results {
   min-width: 510px;
 
