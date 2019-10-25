@@ -63,6 +63,11 @@ export class App extends React.Component {
   }
   
   componentDidUpdate(prevProps, prevState) {
+    if (this.props.location.path != prevProps.location.path || this.props.location.search != prevProps.location.search) {
+      gtag('config', 'UA-144217456-2', {
+         'page_location': document.location.href,
+       });
+    }
     if (this.props.location.search != prevProps.location.search) {
       var qparams = qs.parse(this.props.location.search, { ignoreQueryPrefix: true })
       
