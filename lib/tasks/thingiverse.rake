@@ -164,7 +164,7 @@ namespace :things do
     end
   end
 
-  task :details, [:start_id, :end_id] => :environment do |t, args|
+  task :recent_details, [:start_id, :end_id] => :environment do |t, args|
     
     Rails.logger = Logger.new(STDOUT)
     Rails.logger.level = Logger::INFO
@@ -176,7 +176,7 @@ namespace :things do
     last_id = start_id = args[:start_id].to_i || 0    
     batch_size = 200
     offset = 0
-    thingquery = Thing.where("id >= #{start_id}").where("description IS NULL and deleted = false").order("id asc")
+    thingquery = Thing.where("id >= #{start_id}").where("added_on IS NULL and deleted = false").order("id asc")
                   # where("job_id IS NULL or job_id != #{job.id}").order("id asc")
 
     end_id = args[:end_id].to_i || 0  
@@ -195,12 +195,75 @@ namespace :things do
         t.job_id = job.id
         t.updated_at = DateTime.now.utc
         fresp = create_details(t)
-        
 
         if fresp[:not_found]
           t.deleted = true
           t.updated_at = DateTime.now.utc
           t.save
+          # t.__elasticsearch__.delete_document
+        else
+          thingids << t.id  if !fresp[:error]
+          last_id = [last_id, t.id].max
+        end
+
+        ratelimit = (fresp[:headers] && fresp[:headers]["x-ratelimit-remaining"] && fresp[:headers]["x-ratelimit-remaining"].to_i) || -1
+        if fresp[:calm]
+          Rails.logger.info("RateLimit Calming Sleep #{ratelimit}")
+          sleep(45)
+        elsif ratelimit >= 0 && ratelimit < 3
+          Rails.logger.info("RateLimit Sleep #{ratelimit}")
+          sleep(30)
+        end
+        # t.thing_files
+      end
+      
+      # Thing.where(id: thingids).update_all(file_updated: DateTime.now.utc)  if thingids.count > 0
+      # Rails.logger.info("Doccnt = #{docs.count}")
+      # {|t| t.__elasticsearch__.index_document }.count
+      if docs.count == batch_size
+        offset += batch_size
+        hasMore = true
+      end
+    end
+  end
+
+  task :details, [:start_id, :end_id] => :environment do |t, args|
+    
+    Rails.logger = Logger.new(STDOUT)
+    Rails.logger.level = Logger::INFO
+    trap('SIGINT') { puts "KILLED IT"; exit! }
+
+    job = Job.last
+
+    params = {page: 1}
+    last_id = start_id = args[:start_id].to_i || 0    
+    batch_size = 200
+    offset = 0
+    thingquery = Thing.where("id >= #{start_id}").where("added_on IS NULL and deleted = false").order("id asc")
+                  # where("job_id IS NULL or job_id != #{job.id}").order("id asc")
+
+    end_id = args[:end_id].to_i || 0  
+    thingquery = thingquery.where("things.id <= #{end_id}") if end_id > 0
+    Rails.logger.info("Starting ID #{start_id}")
+    # Rails.logger.info(thingquery.count())
+    # exit!
+    cnt = 0
+    hasMore = true
+    while hasMore
+      hasMore = false
+      cnt += 1
+      Rails.logger.info("Starting Cnt #{cnt} lastid: #{last_id}, :offset: #{offset} - #{start_id + offset}")
+      thingids = []
+      docs = thingquery.limit(batch_size).offset(offset).each do |t|
+        t.job_id = job.id
+        t.updated_at = DateTime.now.utc
+        fresp = create_details(t)
+
+        if fresp[:not_found]
+          t.deleted = true
+          t.updated_at = DateTime.now.utc
+          t.save
+          t.__elasticsearch__.delete_document
         else
           thingids << t.id  if !fresp[:error]
           last_id = [last_id, t.id].max
@@ -278,6 +341,65 @@ namespace :things do
       end
       
       Thing.where(id: thingids).update_all(file_updated: DateTime.now.utc)  if thingids.count > 0
+      # Rails.logger.info("Doccnt = #{docs.count}")
+      # {|t| t.__elasticsearch__.index_document }.count
+      if docs.count == batch_size
+        offset += batch_size
+        hasMore = true
+      end
+    end
+  end
+
+  task :fetch_tags, [:start_id, :end_id] => :environment do |t, args|
+    
+    Rails.logger = Logger.new(STDOUT)
+    Rails.logger.level = Logger::INFO
+    trap('SIGINT') { puts "KILLED IT"; exit! }
+
+    params = {page: 1}
+    last_id = start_id = args[:start_id].to_i || 0    
+    batch_size = 200
+    offset = 0
+    thingquery = Thing.where("things.id >= #{start_id} and things.deleted = ?", false).
+                where("tag_updated IS NULL or tag_updated < ?", DateTime.now.utc - 2.weeks).order("id asc")
+
+    end_id = args[:end_id].to_i || 0  
+    thingquery = thingquery.where("things.id <= #{end_id}") if end_id > 0
+    Rails.logger.info("Starting ID #{start_id}")
+    # Rails.logger.info(thingquery.count())
+    # exit!
+    cnt = 0
+    hasMore = true
+    while hasMore
+      hasMore = false
+      cnt += 1
+      Rails.logger.info("Starting Cnt #{cnt} lastid: #{last_id}, :offset: #{offset} - #{start_id + offset}")
+      thingids = []
+      docs = thingquery.limit(batch_size).offset(offset).each do |t|
+        fresp = fetch_thing_tags(t)
+        
+
+        if fresp[:not_found]
+          t.deleted = true
+          t.tag_updated = DateTime.now.utc
+          t.save
+        else
+          thingids << t.id  if !fresp[:error]
+          last_id = [last_id, t.id].max
+        end
+
+        ratelimit = (fresp[:headers] && fresp[:headers]["x-ratelimit-remaining"] && fresp[:headers]["x-ratelimit-remaining"].to_i) || -1
+        if fresp[:calm]
+          Rails.logger.info("RateLimit Calming Sleep #{ratelimit}")
+          sleep(45)
+        elsif ratelimit >= 0 && ratelimit < 3
+          Rails.logger.info("RateLimit Sleep #{ratelimit}")
+          sleep(30)
+        end
+        # t.thing_files
+      end
+      
+      Thing.where(id: thingids).update_all(tag_updated: DateTime.now.utc)  if thingids.count > 0
       # Rails.logger.info("Doccnt = #{docs.count}")
       # {|t| t.__elasticsearch__.index_document }.count
       if docs.count == batch_size
@@ -376,6 +498,7 @@ namespace :things do
   end
 
 end
+
 
 def build_model_version_image(data)
 
@@ -499,16 +622,11 @@ def fetch_thing_files(thing, params = {})
       exist = thing.thing_files.select(:thingiverse_id).where(thingiverse_id: filethingids).pluck(:thingiverse_id)
       thingfiles = (filethingids).map{|id| hm[id] }
 
-      # binding.pry
       res = ThingFile.import(columns, thingfiles, on_duplicate_key_update: {conflict_target: [:thingiverse_id], columns: [:download_count, :updated_at, :image_url]})
       if res.failed_instances.count > 0
         Rails.logger.info("Res: Failed: #{res.failed_instances},  Num IDS: #{res.ids.count}, , Num Inserts: #{res.num_inserts}, ")
       end
-      # thing.thing_files.build(thingfiles)
-      # binding.pry
-      # returnmsg = {headers: resp.headers, success: res.ids.count, failed: res.failed_instances.count }
-      # if res.ids.count == 0 && res.failed_instances.count > 0
-      #   returnmsg[:error] = "Failed to Update"
+
       return {headers: resp.headers, success: res.ids.count, failed: res.failed_instances.count }
       # if !thing.valid?
       #     puts ("Failed Creating ThingFiles #{thing["id"]} #{thing.errors}")        
@@ -549,12 +667,16 @@ def fetch_thing_tags(thing, params = {})
       if res.failed_instances.count > 0
         Rails.logger.info("Res: Failed: #{res.failed_instances},  Num IDS: #{res.ids.count}, , Num Inserts: #{res.num_inserts}, ")
       end
-      return res
+      # return res
       # if !thing.valid?
       #     puts ("Failed Creating ThingTags #{thing["id"]} #{thing.errors}")        
       # end
+      return {headers: resp.headers, success: res.ids.count, failed: res.failed_instances.count }
+      # if !thing.valid?
+      #     puts ("Failed Creating ThingFiles #{thing["id"]} #{thing.errors}")        
+      # end
     end
-    return {success: thing.valid? }
+    return {headers: resp.headers, success: 0, failed: 0}
   end
 end
 
@@ -577,13 +699,12 @@ def fetch_thing_categories(thing, params = {})
       res = CategoryThing.import(columns, (cats - curcats).map{|t| [t.id, thing.id, DateTime.now.utc, DateTime.now.utc] }, on_duplicate_key_ignore: true)
       
       # thing.categories << (cats - curcats)
-      
-      return res
+      return {headers: resp.headers, success: res.ids.count, failed: res.failed_instances.count }
       # if !thing.valid?
-      #     puts ("Failed Creating ThingCategories #{thing["id"]} #{thing.errors}")        
+      #     puts ("Failed Creating ThingFiles #{thing["id"]} #{thing.errors}")        
       # end
     end
-    return {success: thing.valid?}
+    return {headers: resp.headers, success: 0, failed: 0}
   end
 end
 
