@@ -239,7 +239,8 @@ namespace :things do
     last_id = start_id = args[:start_id].to_i || 0    
     batch_size = 200
     offset = 0
-    thingquery = Thing.where("id >= #{start_id}").where("added_on IS NULL and deleted = false").order("id asc")
+    thingquery = Thing.where("id >= #{start_id}").where("deleted = false")
+                  .where("added_on IS NULL or updated_at < ?", DateTime.now.utc - 1.week).order("id asc")
                   # where("job_id IS NULL or job_id != #{job.id}").order("id asc")
 
     end_id = args[:end_id].to_i || 0  
@@ -263,7 +264,6 @@ namespace :things do
           t.deleted = true
           t.updated_at = DateTime.now.utc
           t.save
-          t.__elasticsearch__.delete_document
         else
           thingids << t.id  if !fresp[:error]
           last_id = [last_id, t.id].max
