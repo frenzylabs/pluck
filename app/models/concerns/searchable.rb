@@ -7,6 +7,25 @@ module Searchable
     thing_es_settings = {
       index: {
         analysis: {
+          normalizer: {
+            custom_normalizer: {
+              type: "custom",
+              char_filter: ["stopword_char_filter", "trim_char_filter"],
+              filter: ["lowercase"]
+            }
+          },
+          char_filter: {
+            stopword_char_filter: {
+              type: "pattern_replace",
+              pattern: "( ?a ?| ?and ?| ?the ?)",
+              replacement: " "
+            },
+            trim_char_filter: {
+              type: "pattern_replace",
+              pattern: "(\\s+)$",
+              replacement: ""
+            }
+          },
           filter: {
             autocomplete_filter: {
               type: "edge_ngram",
@@ -31,6 +50,10 @@ module Searchable
               type: "custom",
               tokenizer: "standard",
               filter: ["lowercase", "my_stop", "my_snow"]
+            },
+            lower_keyword_analyzer: {
+              tokenizer: "keyword",
+              filter: ["lowercase"]
             },
             lowercase_analyzer: {
               type: "custom",
@@ -99,8 +122,9 @@ module Searchable
     #   } } do
     settings thing_es_settings do
       mapping do
-        indexes :name, type: :text, analyzer: :lowercase_analyzer do
-          indexes :lower, analyzer: :snowball_analyzer
+        indexes :name, type: :text, analyzer: :snowball_analyzer do
+          # indexes :lower, analyzer: :snowball_analyzer
+          indexes :exact, analyzer: :lower_keyword_analyzer
         end
         indexes :description, type: :text, analyzer: :my_english_analyzer
         indexes :download_count, type: :integer
@@ -109,7 +133,7 @@ module Searchable
         indexes :updated_on, type: :date
         indexes :tags, type: :object do
           indexes :lname, type: :text, analyzer: :standard do
-            indexes :exact, type: :text, analyzer: :standard
+            indexes :exact, type: :text, analyzer: :lower_keyword_analyzer
           end
           indexes :thing_count, type: :integer
         end
@@ -123,7 +147,7 @@ module Searchable
           indexes :download_count, type: :integer
         end
         indexes :user, type: :object do
-          indexes :name, type: :text, analyzer: :keyword
+          indexes :name, type: :text, analyzer: :lower_keyword_analyzer
         end
       end
     end
@@ -135,6 +159,8 @@ module Searchable
         query: {
           function_score: {
               score_mode: "avg",
+              # boost_mode: "multiply",
+              # max_boost: 30,
               query: {
                 bool: {
                   must: [
@@ -144,15 +170,15 @@ module Searchable
                         {
                           multi_match: {
                             query: query,
-                            fields: ["name", "user.name"],
-                            boost: 5
+                            fields: ["name.exact", "user.name"],
+                            boost: 10
                           }
                         },
                         {
                           multi_match: {
                             query: query,
-                            fields: ["name.lower", "thing_files.name", "thing_files.name.exact"],
-                            boost: 2
+                            fields: ["name", "thing_files.name", "thing_files.name.exact"],
+                            boost: 5
                           }
                         },
                         {
@@ -166,8 +192,13 @@ module Searchable
                   }
                   ]
                 }
-              },
+              },              
               functions: [
+              #   script_score: {
+              #     script: {
+              #       source: "Math.log(2 + doc['download_count'].value)"
+              #     }
+              # }
                 {
                   gauss: {
                       updated_on: {
@@ -179,17 +210,31 @@ module Searchable
                   }
                 },
                 {
+                  filter: {
+                    range: {
+                      download_count: {
+                        from: 1
+                      }
+                    }
+                  }, 
                   field_value_factor: {
                     field: "like_count",
-                    factor: 1.1,
+                    # factor: 1.1,
                     modifier: "log1p",
                     missing: 1
                   }
                 },
                 {
+                  filter: {
+                    range: {
+                      download_count: {
+                        from: 1
+                      }
+                    }
+                  }, 
                   field_value_factor: {
                     field: "download_count",
-                    factor: 1.1,
+                    # factor: 1.1,
                     modifier: "log1p",
                     missing: 1
                   }

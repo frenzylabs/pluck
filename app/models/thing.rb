@@ -1,6 +1,6 @@
 class Thing < ApplicationRecord
   include Searchable
-  index_name    "things2"
+  index_name    "things"
 
   belongs_to :job, optional: true
   belongs_to :user
@@ -26,7 +26,6 @@ class Thing < ApplicationRecord
   end
 
   def self.indexme
-    binding.pry
     self.__elasticsearch__.create_index! force: true
   end
 end
