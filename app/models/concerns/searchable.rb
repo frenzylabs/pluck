@@ -159,8 +159,8 @@ module Searchable
         query: {
           function_score: {
               score_mode: "avg",
-              # boost_mode: "multiply",
-              # max_boost: 30,
+              boost_mode: "multiply",
+              max_boost: 40,
               query: {
                 bool: {
                   must: [
@@ -171,14 +171,23 @@ module Searchable
                           multi_match: {
                             query: query,
                             fields: ["name.exact", "user.name"],
-                            boost: 10
+                            boost: 20
+                          }
+                        },
+                        {
+                          multi_match: {
+                            query: query,
+                            type: "phrase",
+                            fields: ["name"],
+                            boost: 15
                           }
                         },
                         {
                           multi_match: {
                             query: query,
                             fields: ["name", "thing_files.name", "thing_files.name.exact"],
-                            boost: 5
+                            # boost: 5,
+                            tie_breaker: 0.1
                           }
                         },
                         {
@@ -194,11 +203,18 @@ module Searchable
                 }
               },              
               functions: [
-              #   script_score: {
-              #     script: {
-              #       source: "Math.log(2 + doc['download_count'].value)"
-              #     }
-              # }
+              #   {
+              #     "filter": { "match": { "test": "bar" } },
+              #     "random_score": {}, 
+              #     "weight": 23
+              # },
+                # {
+                #   script_score: {
+                #     script: {
+                #       source: "Math.log(1 + doc['download_count'].value)"
+                #     }
+                #   }
+                # },
                 {
                   gauss: {
                       updated_on: {
@@ -212,7 +228,7 @@ module Searchable
                 {
                   filter: {
                     range: {
-                      download_count: {
+                      like_count: {
                         from: 1
                       }
                     }

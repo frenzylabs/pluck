@@ -1,6 +1,6 @@
 class Thing < ApplicationRecord
   include Searchable
-  index_name    "things"
+  index_name    "things3"
 
   belongs_to :job, optional: true
   belongs_to :user
