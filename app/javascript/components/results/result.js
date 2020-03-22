@@ -11,7 +11,8 @@ import React from 'react'
 import { 
   Card, 
   Button,
-  Image
+  Image,
+  Popup
 } from 'semantic-ui-react'
 
 export default class Result extends React.Component {
@@ -68,11 +69,15 @@ export default class Result extends React.Component {
   render() {
     return (
       <Card style={{width: '220px'}}>
+      
         {this.renderImage(this.props.image)}
         <Card.Content>
           <Card.Description>
             {this.props.name}
           </Card.Description>
+          <Card.Meta style={{display: 'none'}}>
+           {this.props.item.description}
+          </Card.Meta>
         </Card.Content>
         <Card.Content extra style={{padding: '10px', margin: 0}}>
           <Button.Group fluid>

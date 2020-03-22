@@ -13,6 +13,8 @@ Rails.application.routes.draw do
      get 'model_versions/:id/:filepath', constraints: { filepath: /.*/ }, to: 'model_versions#show'
     end 
   end 
+
+  get 'things/:id', to: 'things#show'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#index'
 end
