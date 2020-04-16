@@ -1,0 +1,15 @@
+<div style="margin-bottom: 30px">
+  <h4 class="ui header center aligned">
+    Manage a project on <a href="https://layerkeep.com" target="_blank">LayerKeep</a> or view it on Thingiverse
+  </h4>
+</div>
+
+<div class="ui three column grid cards">
+  <% @things.each do |thing| %>
+    <%= render "things/thing_list_item", thing: thing %>
+  <% end %>
+</div>
+
+<div class="ui centered cards" style="padding-bottom: 200px">
+  <%= paginate @paginatedthings %>          
+</div>

@@ -1,4 +1,6 @@
 class HomeController < ApplicationController
+  layout 'app'
+  
   def index
     @per_page = [params.fetch("per_page", 20).to_i, 50].min
     @page = params.fetch("page", 1)
