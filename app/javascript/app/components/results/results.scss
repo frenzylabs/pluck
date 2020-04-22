@@ -1,0 +1,76 @@
+//
+//  results.scss
+//  pluck
+// 
+//  Created by Wess Cope (wess@frenzylabs.com) on 04/22/20
+//  Copyright 2020 FrenzyLabs LLC.
+//
+
+@import "../../../../assets/stylesheets/mixins";
+
+#results {
+  padding: {
+    top: 20px;
+    right: 10px;
+    bottom: 20px;
+    left: 20px;
+  };
+
+  .column {
+    .truncated {
+      white-space: nowrap;
+      overflow:hidden; 
+      text-overflow: ellipsis;
+    }
+
+    figure {
+      height: 360px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow:hidden;
+
+      .item-content {
+        display:flex;
+        flex: 1;
+        opacity: 0;
+        // background: rgba(0, 0, 0, 0.8);
+        width: 100%;
+        flex-direction: column;
+        justify-content: flex-end;
+
+        @include gradient(rgba(255, 255, 255, 0), rgba(0, 0, 0, 1), vertical);
+
+        @include fade-easing();
+        
+        &:hover {
+          opacity: 1;  
+        }
+        
+        article {
+          color: #fff;
+        }
+
+        .column {
+          &:first-child {
+            margin: {
+              top: 0;
+              right: 4px;
+              bottom: 8px;
+              left: 10px;
+            }
+          }
+
+          &:last-child {
+            margin: {
+              top: 0;
+              right: 10px;
+              bottom: 8px;
+              left: 4px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

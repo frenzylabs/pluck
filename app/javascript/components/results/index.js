@@ -26,6 +26,10 @@ export default class Results extends React.Component {
 
   renderItems() {
     return (this.props.items || []).map((item, index) => {
+      if(index == 0) {
+        console.log("item: ", item)
+      }
+
       return (
         <Result key={index} item={item.attributes} image={item.attributes.image_url} name={item.attributes.name} tid={item.attributes.thingiverse_id}/>        
       )
@@ -61,21 +65,17 @@ export default class Results extends React.Component {
     
 
     return (
-      <Container fluid id="results">
-        <Container style={{paddingBottom: '100px'}}>
-          <br/><br/>
+      <>
+        <div className="ui three column grid special cards">
+          {this.renderItems()}
+        </div>
 
-          <Card.Group centered>
-            {this.renderItems()}
-          </Card.Group>
+        <br/><br/>
 
-          <Card.Group centered>
-            {this.renderPagination()}
-          </Card.Group>
-
-          <br/><br/>
-        </Container>
-      </Container>
+        <div className="ui centered cards" style={{paddingBottom: '200px'}}>
+          {this.renderPagination()}
+        </div>
+      </>
     )
   }
 }

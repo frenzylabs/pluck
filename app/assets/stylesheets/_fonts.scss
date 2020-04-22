@@ -6,6 +6,15 @@
 //  Copyright 2019 Wess Cope
 //
 
+$fa-font-path: "@fortawesome/fontawesome-pro/webfonts";
+
+@import "@fortawesome/fontawesome-pro/scss/fontawesome.scss";
+@import "@fortawesome/fontawesome-pro/scss/regular.scss";
+@import "@fortawesome/fontawesome-pro/scss/solid.scss";
+@import "@fortawesome/fontawesome-pro/scss/brands.scss";
+
+
+
 @font-face {
   font-family: 'Nexa';
   src: font-url('FontfabricNexaRegular.otf');

@@ -184,24 +184,7 @@ export class App extends React.Component {
 
   render() {
     return (
-      <Container fluid id="master-detail">
-        <Grid stretched columns='equal' className="main-content">
-            <Grid.Column width={3} id="left-menu" >
-              {this.renderMenu()}
-            </Grid.Column>
-
-            <Grid.Column id="master-content">
-              <h1 className="title" style={{textAlign: 'center'}}>Search for 3D Models</h1>
-
-
-              <Container id="results" fluid style={{overflowX: 'auto', overflowY: 'auto', height:'100%', minHeight: '100%'}}>
-                <div style={{padding: '40px 0'}}>
-                  <Results {...this.props} items={this.state.results} kind={this.state.kind} search={this.state.search} onPageChange={this.onPageChange} />
-                </div>
-              </Container>
-            </Grid.Column>
-        </Grid>
-      </Container>
+      <Results {...this.props} items={this.state.results} kind={this.state.kind} search={this.state.search} onPageChange={this.onPageChange} />
     )
   }
 }

@@ -1,9 +1,8 @@
 class HomeController < ApplicationController
-  layout 'app'
-  
   def index
     @per_page = [params.fetch("per_page", 20).to_i, 50].min
-    @page = params.fetch("page", 1)
+    @page     = params.fetch("page", 1)
+    
     @things = 
       if params[:q].blank?
         Thing.includes(:categories, :tags, :user).where(deleted: false).order("updated_at desc").
