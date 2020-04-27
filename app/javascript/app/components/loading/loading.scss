@@ -1,0 +1,101 @@
+//
+//  loading.scss
+//  pluck
+// 
+//  Created by Wess Cope (wess@frenzylabs.com) on 04/23/20
+//  Copyright 2020 FrenzyLabs LLC.
+//
+
+@import "../../../../assets/stylesheets/mixins";
+
+@include keyframes(cubespin) {
+  0% {
+    @include transform(rotateX(-22deg) rotateY(-38deg) rotateZ(0deg));
+  }
+
+  50% {
+    @include transform(rotateX(-22deg) rotateY(-128deg) rotateZ(0deg));
+  }
+
+  100% {
+    @include transform(rotateX(-22deg) rotateY(-398deg) rotateZ(0deg));
+  }
+}
+
+$cube-size: 40px;
+$translate-z: 20px;
+$spin-interval: 2s;
+$transition-interval: 0.5s;
+
+#loading-modal {
+  .modal-card {
+    width: 400px;
+    opacity: 1;
+  }
+
+  section {
+    padding: 40px;
+  }
+
+  h1 {
+    padding-top: 4px;
+  }
+  
+  #cube {
+    #panels {
+      width: $cube-size;
+      height: $cube-size;
+      
+      @include transform-style(preserve-3d);
+      @include rotate3D(-22deg, -38deg, 0deg);
+
+      margin: auto;
+      position: relative;
+
+      @include transform-style(preserve-3d);
+      @include transition(all $transition-interval ease-in-out);
+      @include animate(cubespin $spin-interval infinite);
+
+      .panel {
+        position: absolute;
+        width: $cube-size;
+        height: $cube-size;
+        overflow: hidden;
+        border-radius: 0;
+
+        @include transition(all $transition-interval ease-in-out);
+
+        
+        &:first-child {
+          background: #aed581;
+          @include transform(rotatex(90deg) translateX(0px) translateY(0px) translateZ($translate-z));
+        }
+
+        &:nth-child(2) {
+          background: #9ccc65;
+          @include transform(rotateY(-90deg) translateX(0px) translateY(0px) translateZ($translate-z));
+        }
+
+        &:nth-child(3) {
+          background: #8bc34a;
+          @include transform(translateX(0px) translateY(0px) translateZ($translate-z));
+        }
+
+        &:nth-child(4) {
+          background: #7cb342;
+          @include transform(rotateY(90deg) translateX(0px) translateY(0px) translateZ($translate-z));
+        }
+
+        &:nth-child(5) {
+          background: #689f38;
+          @include transform(rotateY(180deg) translateX(0px) translateY(0px) translateZ($translate-z));
+        }
+
+        &:last-child {
+          background: #33691e;
+          @include transform(rotateX(-90deg) translateX(0px) translateY(0px) translateZ($translate-z));
+        }
+      }
+    }
+  }
+}

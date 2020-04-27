@@ -13,7 +13,8 @@ import qs from 'qs'
 
 import {
   Nav,
-  Results
+  Results,
+  Pagination
 } from './components'
 
 class App extends React.Component {
@@ -23,6 +24,7 @@ class App extends React.Component {
     const {page, per_page, q} = qs.parse(this.props.location.search, {ignoreQueryPrefix: true})
 
     this.state = {
+      loading: false,
       kind: 'text',
       search: {
         page:     parseInt(page) || 1,
@@ -40,6 +42,8 @@ class App extends React.Component {
   }
 
   load() {
+    this.setState({loading: true})
+
     const endpoint = 
       '/api/v1/things.json' +
       qs.stringify(this.state.search, { addQueryPrefix: true })
@@ -59,6 +63,7 @@ class App extends React.Component {
 
       this.update(data.data, search)
     })
+    .finally(() => this.setState({loading: false}))
   }
 
   update(data, search) {
@@ -80,6 +85,8 @@ class App extends React.Component {
   }
 
   onPageChange(e, data) {
+    console.log("DDDD: ", data)
+    
     this.setState({
       search: {
         ...this.state.search,
@@ -116,18 +123,42 @@ class App extends React.Component {
     }
   }
 
+  renderPagination() {
+    const {page, per_page} = qs.parse(this.props.location.search, {ignoreQueryPrefix: true})
+
+    var activePage  = page || 1
+    var perPage     = per_page || 20
+    var totalPages  = activePage
+
+    if (this.state.results.length >= perPage) {
+      totalPages = activePage + 1
+    }
+
+    return (
+      <Pagination
+        activePage={activePage}
+        totalPages={totalPages}
+        onPageChange={this.onPageChange}
+      />
+    )
+  }
+
   render() {
     return (
-      <div className="has-navbar-fixed-top">
-        <Nav/>
+      <div style={{paddingBottom: '300px'}}>
+        <Nav disabled={this.state.loading} handleSearch={this.search}/>
 
         <Results
           {...this.props}
 
           items={this.state.results}
           search={this.state.search}
-          onPageChange={this.onPageChange}
         />
+
+        {this.renderPagination()}
+
+        <br/><br/>
+
       </div>
     )
   }

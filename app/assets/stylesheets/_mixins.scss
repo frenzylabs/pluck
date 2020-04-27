@@ -6,6 +6,8 @@
 //  Copyright 2020 FrenzyLabs LLC.
 //
 
+@use "sass:meta";
+
 @mixin gradient($start-color, $end-color, $orientation) {
   background: $start-color;
   @if $orientation == 'vertical' {
@@ -20,12 +22,47 @@
   }
 }
 
+@mixin transition($params...) {
+  -webkit-transition: $params;
+  -moz-transition:    $params;
+  -ms-transition:     $params;
+  -o-transition:      $params;
+  transition:         $params;
+}
+
+@mixin transform-style($s) {
+  transform-style:          $s;
+  -moz-transfor-style:      $s;
+  -webkit-transform-style:  $s;
+}
+
+@mixin transform($transforms...) {
+  -moz-transform: $transforms;
+-webkit-transform: $transforms;
+       transform: $transforms;
+}
+
 @mixin fade-easing() {
   $interval: 0.5s;
 
-  -webkit-transition: opacity $interval ease-in-out;
-  -moz-transition:    opacity $interval ease-in-out;
-  -ms-transition:     opacity $interval ease-in-out;
-  -o-transition:      opacity $interval ease-in-out;
-  transition:         opacity $interval ease-in-out;
+  @include transition(opacity, 0.5s, ease-in-out);
+}
+
+@mixin rotate3D($x: 0deg, $y: 0deg, $z: 0deg) {
+  @include transform(rotateX($x), rotateY($y), rotateZ($z));
+}
+
+@mixin keyframes($name) {
+  @-webkit-keyframes #{$name} {
+    @content;
+  }
+
+  @keyframes #{$name} {
+    @content;
+  }
+}
+
+@mixin animate($params...) {
+  -webkit-animation: $params;
+  animation: $params;
 }
