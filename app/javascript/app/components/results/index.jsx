@@ -74,7 +74,14 @@ export default class extends React.Component {
                   </div>
 
                   <div className="column">
-                    <button className="button">
+                    <button className="button" onClick={(e) => {
+                      e.stopPropagation()
+                      
+                      window.open(
+                        `${window.currentEnv.domains.layerkeep}/projects/new?source=thingiverse&thing_id=${item.thingiverse_id}`,
+                        "_blank"
+                      )
+                    }}>
                       <span className="icon is-small">
                         <i className="fas fa-layer-plus"></i>
                       </span>
