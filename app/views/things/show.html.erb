@@ -1,22 +1,2 @@
-<p id="notice"><%= notice %></p>
-
-<p>
-  <strong>Name:</strong>
-  <%= @thing.name %>
-</p>
-
-<p>
-  <strong>Thing:</strong>
-  <%= @thing.thingiverse_id %>
-</p>
-
-<p>
-  <strong>Created at:</strong>
-  <%= @thing.created_at %>
-</p>
-
-<p>
-  <strong>Updated at:</strong>
-  <%= @thing.updated_at %>
-</p>
-
+<%= react_component("nav/index") %>
+<%= react_component("details/index", {item: @thing}) %>

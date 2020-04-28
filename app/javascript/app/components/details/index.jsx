@@ -39,7 +39,7 @@ export default class extends React.Component {
             {this.props.item.name}
           </h1>
 
-          {this.props.item.user.name && (
+          {this.props.item.user && this.props.item.user.name && (
             <p className="heading">
               by <a href={`https://www.thingiverse.com/${this.props.item.user.name}`} target="_blank">
                   {this.props.item.user.name}
@@ -97,12 +97,14 @@ export default class extends React.Component {
               </a>
             </div>
 
-            <div className="details-tag">
-              <h2 className="title is-6">Categories</h2>
-              <div className="tags">
-                {this.props.item.categories.map((cat, idx) => <span key={idx} className="tag">{cat.name}</span>)}
+            {this.props.item.categories && (
+              <div className="details-tag">
+                <h2 className="title is-6">Categories</h2>
+                <div className="tags">
+                  {this.props.item.categories.map((cat, idx) => <span key={idx} className="tag">{cat.name}</span>)}
+                </div>
               </div>
-            </div>
+            )}
 
           </div>
         </div>

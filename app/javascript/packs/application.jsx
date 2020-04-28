@@ -16,7 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const htmlTag = document.getElementsByTagName('html')[0]
 
   ReactDOM.render(
-    <BrowserRouter >
+    <BrowserRouter>
       <App />
     </BrowserRouter>, document.getElementById('app'))
 });
+
+/// SERVER SIDE COMPONENTS
+require("react_ujs").useContext(
+  require.context("app/components", true)
+)

@@ -22,6 +22,7 @@ export default class extends React.Component {
 
     this.modalEsc   = this.modalEsc.bind(this)
     this.escToggle  = this.escToggle.bind(this)
+    this.get        = this.get.bind(this)
   }
 
   modalEsc(e) {
@@ -42,6 +43,14 @@ export default class extends React.Component {
     }
   }
 
+  componentDidMount() {
+    const [_, path, id] = this.props.location.pathname.split('/')
+
+    if(path.toLowerCase() == "things") {
+      this.get(id)
+    }
+  }
+
   componentWillUnmount() {
     document.removeEventListener("keypress", this.modalEsc, false)
   }
@@ -57,11 +66,26 @@ export default class extends React.Component {
     }
   }
 
+  get(id) {
+    fetch(`/things/${id}.json`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("DD: ", data)
+      this.setState({
+        presentedItem: {attributes: data}
+      })
+    })
+    .catch(err => console.log("ERR: ", err))
+  }
+
   renderColumn(key, item) {
     return (
       <div key={key} className="column is-one-third is-narrow">
         <div className="card">
-          <a className="card-image" onClick={() => this.setState({presentedItem: item})}>
+          <a className="card-image" href={`/things/${item.id}`} onClick={(e) => {
+            e.preventDefault()
+            this.setState({presentedItem: item})
+          }}>
             <figure style={this.backgroundImage(item.attributes.image_url)}>
               <div className="item-content">
                 <div className="columns">
@@ -103,12 +127,12 @@ export default class extends React.Component {
 
   render() {
     this.escToggle()
-
+    
     return (
       <>
         <div id="results" className="container">
           <div className="columns is-multiline is-centered">
-            {this.props.items.map((item, index) => this.renderColumn(index, item))}
+            {this.props.items && this.props.items.map((item, index) => this.renderColumn(index, item))}
           </div>
         </div>
 

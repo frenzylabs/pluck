@@ -85,8 +85,6 @@ class App extends React.Component {
   }
 
   onPageChange(e, data) {
-    console.log("DDDD: ", data)
-    
     this.setState({
       search: {
         ...this.state.search,
