@@ -5,7 +5,7 @@
 //  Created by Wess Cope (wess@frenzylabs.com) on 04/22/20
 //  Copyright 2020 FrenzyLabs LLC.
 //
-import './results.scss'
+// import './results.scss'
 
 import React    from 'react'
 import Truncate from 'react-truncate'
@@ -32,18 +32,19 @@ export default class extends React.Component {
   }
 
   escToggle() {
-    if(this.state.presentedItem) {
-      document.addEventListener("keypress", this.modalEsc, false)
+    // if(this.state.presentedItem) {
+    //   document.addEventListener("keypress", this.modalEsc, false)
 
-      Array.prototype.slice.call(document.querySelectorAll('.modal-background')).forEach((el) => {
-        el.addEventListener('click', this.modalEsc)
-      })
-    } else {
-      document.removeEventListener("keypress", this.modalEsc, false)
-    }
+    //   Array.prototype.slice.call(document.querySelectorAll('.modal-background')).forEach((el) => {
+    //     el.addEventListener('click', this.modalEsc)
+    //   })
+    // } else {
+    //   document.removeEventListener("keypress", this.modalEsc, false)
+    // }
   }
 
   componentDidMount() {
+    if (!this.props.location) return
     const [_, path, id] = this.props.location.pathname.split('/')
 
     if(path.toLowerCase() == "things") {
@@ -52,9 +53,13 @@ export default class extends React.Component {
   }
 
   componentWillUnmount() {
-    document.removeEventListener("keypress", this.modalEsc, false)
+    // document.removeEventListener("keypress", this.modalEsc, false)
   }
 
+  thingImage(url) {
+    let lurl  = (url == null || url.length == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
+    return lurl
+  }
   backgroundImage(url) {
     let lurl  = (url == null || url.length == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
 
@@ -86,8 +91,12 @@ export default class extends React.Component {
             e.preventDefault()
             this.setState({presentedItem: item})
           }}>
-            <figure style={this.backgroundImage(item.attributes.image_url)}>
+            <figure >
+              <div className="image">
+                <img className="thing-image" src={this.thingImage(item.attributes.image_url)} />
+              </div>
               <div className="item-content">
+                
                 <div className="columns">
                   <div className="column is-9">
                     <article>
@@ -129,7 +138,7 @@ export default class extends React.Component {
     this.escToggle()
     
     return (
-      <>
+      <div>
         <div id="results" className="container">
           <div className="columns is-multiline is-centered">
             {this.props.items && this.props.items.map((item, index) => this.renderColumn(index, item))}
@@ -152,7 +161,7 @@ export default class extends React.Component {
             onClick={() => this.setState({presentedItem: null})}>
           </button>
         </div>
-      </>
+      </div>
     )
   }
 }

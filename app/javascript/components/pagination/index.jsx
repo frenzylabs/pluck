@@ -8,7 +8,7 @@
 
 import React from 'react'
 
-import './pagination.scss'
+// import './pagination.scss'
 
 export default class extends React.Component {
   pageHandler(index) {

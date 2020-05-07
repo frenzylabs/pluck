@@ -6,7 +6,8 @@
 //  Copyright 2020 FrenzyLabs LLC.
 //
 
-export {default as Nav}         from './nav'
+export {default as TopNav }         from './nav'
 export {default as Loading}     from './loading' 
 export {default as Results}     from './results'
 export {default as Pagination}  from './pagination'
+export {default as PaginatedList }  from './pagination/pagination'

@@ -9,9 +9,9 @@
 import React  from 'react'
 import Logo   from '../../assets/images/pluck-logo.svg'
 
-import "./nav.scss";
+// import "./nav.scss";
 
-export default class extends React.Component {
+class TopNav extends React.Component {
   state = {
     term: ""
   }
@@ -108,3 +108,6 @@ export default class extends React.Component {
     )
   }
 }
+
+export default TopNav
+

@@ -12,12 +12,12 @@ import {withRouter} from 'react-router-dom'
 import qs from 'qs'
 
 import {
-  Nav,
+  TopNav,
   Results,
-  Pagination
+  PaginatedList
 } from './components'
 
-class App extends React.Component {
+export class App extends React.Component {
   constructor(props) {
     super(props)
 
@@ -38,7 +38,8 @@ class App extends React.Component {
     this.load         = this.load.bind(this)
     this.update       = this.update.bind(this)
     this.search       = this.search.bind(this)
-    this.onPageChange = this.onPageChange.bind(this)
+    // this.onPageChange = this.onPageChange.bind(this)
+    this.onChangePage = this.onChangePage.bind(this)
   }
 
   load() {
@@ -53,8 +54,10 @@ class App extends React.Component {
     .then(data => {
       var search = this.state.search
 
+      console.log('SEARCH = ', search)
+
       if(this.state.search.per_page != data.meta.per_page) {
-        search.per_page = data.meta.per_page
+        search.per_page = parseInt(data.meta.per_page)
 
         this.props.history.push(
           qs.stringify(search, { addQueryPrefix: true })
@@ -67,6 +70,7 @@ class App extends React.Component {
   }
 
   update(data, search) {
+    
     this.setState({
       results:  data,
       search:   search
@@ -84,14 +88,14 @@ class App extends React.Component {
     })
   }
 
-  onPageChange(e, data) {
-    this.setState({
-      search: {
-        ...this.state.search,
-        page: data.activePage
-      }
-    })
-  }
+  // onPageChange(e, data) {
+  //   this.setState({
+  //     search: {
+  //       ...this.state.search,
+  //       page: data.activePage
+  //     }
+  //   })
+  // }
   
   componentDidMount() {
     this.load()
@@ -103,8 +107,8 @@ class App extends React.Component {
       
       this.setState({
         search: {
-          page:     page,
-          per_page: per_page,
+          page:     parseInt(page),
+          per_page: parseInt(per_page),
           q:        q || ""
         }
       })
@@ -113,6 +117,7 @@ class App extends React.Component {
     }
 
     if(JSON.stringify(this.state.search) != JSON.stringify(prevState.search)) {
+      console.log("PUSH HISTORY", this.state.search)
       this.props.history.push(
         qs.stringify(this.state.search, { addQueryPrefix: true })
       )
@@ -121,30 +126,63 @@ class App extends React.Component {
     }
   }
 
+  // renderPagination() {
+  //   const {page, per_page} = qs.parse(this.props.location.search, {ignoreQueryPrefix: true})
+
+  //   var activePage  = page || 1
+  //   var perPage     = per_page || 20
+  //   var totalPages  = activePage
+
+  //   if (this.state.results.length >= perPage) {
+  //     totalPages = activePage + 1
+  //   }
+
+  //   return (
+  //     <Pagination
+  //       activePage={activePage}
+  //       totalPages={totalPages}
+  //       onPageChange={this.onPageChange}
+  //     />
+  //   )
+  // }
+
+  onChangePage(page) {
+    // update state with new page of items
+    console.log("ON PAGE CHANGE")
+    this.setState({
+      search: {
+        ...this.state.search,
+        page: parseInt(page)
+      }
+    })
+  }
+
   renderPagination() {
     const {page, per_page} = qs.parse(this.props.location.search, {ignoreQueryPrefix: true})
 
-    var activePage  = page || 1
-    var perPage     = per_page || 20
-    var totalPages  = activePage
+    var currentPage  = parseInt(page) || 1
+    var perPage     = parseInt(per_page) || 20
+    var totalPages  = currentPage
 
     if (this.state.results.length >= perPage) {
-      totalPages = activePage + 1
+      totalPages = currentPage + 1
     }
-
-    return (
-      <Pagination
-        activePage={activePage}
-        totalPages={totalPages}
-        onPageChange={this.onPageChange}
-      />
-    )
+    var total = this.state.results.length //totalPages * perPage
+    
+    if (this.state.results.length > 0) {
+      // var {current_page, last_page, total} = this.state.list.meta;
+      // console.log('CurPage = ', currentPage)
+      // console.log('totalPages = ', totalPages)
+      return (
+        <PaginatedList location={this.props.location} currentPage={currentPage} pageSize={this.state.search.perPage} totalPages={totalPages} totalItems={total} onChangePage={this.onChangePage} /> 
+      )
+    }
   }
 
   render() {
     return (
       <div style={{paddingBottom: '300px'}}>
-        <Nav disabled={this.state.loading} handleSearch={this.search}/>
+        <TopNav disabled={this.state.loading} handleSearch={this.search}/>
 
         <Results
           {...this.props}

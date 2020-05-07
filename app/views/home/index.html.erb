@@ -1,4 +1,5 @@
-<%= react_component("nav/index") %>
-<%= react_component("results/index", {items: @things}) %>
-<%= react_component("pagination/index") %>
+<%= react_component("nav/index", {greeting: "hi"}, {prerender: true}) %>
+<%= react_component("index.Results", {items: @things}, {prerender: true}) %>
+<%= react_component("pagination/pagination", {totalItems: @paginatedthings.length, location: {search: "?#{request.query_string}"}, totalPages: (@things.length < @per_page.to_i ? @page.to_i : @page.to_i + 1), currentPage: @page.to_i, perPage: @per_page}, {prerender: true}) %>
+
 <br/><br/>

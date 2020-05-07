@@ -6,7 +6,7 @@
 //  Copyright 2020 FrenzyLabs LLC.
 //
 
-import './details.scss'
+// import './details.scss'
 
 import React from 'react'
 
@@ -27,7 +27,7 @@ export default class extends React.Component {
       backgroundSize:     "cover",
       backgroundRepeat:   "no-repeat",
       backgroundPosition: "50% 0",
-      height:             '680px'
+      height:             '90vh'
     }
   }
 

@@ -51,7 +51,7 @@ COPY config/boot.rb ./config/boot.rb
 # COPY config ./config
 COPY Rakefile package.json postcss.config.js babel.config.js ./
 
-
+COPY .npmrc .npmrc
 
 ENV SECRET_KEY_BASE=${SECRET_KEY_BASE:-c959724279db5ca746e7a88}
 

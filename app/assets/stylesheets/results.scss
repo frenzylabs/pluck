@@ -6,7 +6,7 @@
 //  Copyright 2020 FrenzyLabs LLC.
 //
 
-@import "../../../../assets/stylesheets/mixins";
+// @import "mixins";
 
 #results {
   padding: {
@@ -30,6 +30,23 @@
       justify-content: flex-end;
       overflow:hidden;
 
+      .image {
+        
+        display: flex;
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        position: absolute;
+        z-index: 1;
+
+        img {
+          width: auto;
+          max-height: 100%;
+          max-width: 100%;
+        }
+      }
+
       .item-content {
         display:flex;
         flex: 1;
@@ -38,6 +55,7 @@
         width: 100%;
         flex-direction: column;
         justify-content: flex-end;
+        z-index: 2;
 
         @include gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 1), vertical);
 
