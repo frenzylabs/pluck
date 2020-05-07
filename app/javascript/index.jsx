@@ -38,7 +38,6 @@ export class App extends React.Component {
     this.load         = this.load.bind(this)
     this.update       = this.update.bind(this)
     this.search       = this.search.bind(this)
-    // this.onPageChange = this.onPageChange.bind(this)
     this.onChangePage = this.onChangePage.bind(this)
   }
 
@@ -53,8 +52,6 @@ export class App extends React.Component {
     .then(res => res.json())
     .then(data => {
       var search = this.state.search
-
-      console.log('SEARCH = ', search)
 
       if(this.state.search.per_page != data.meta.per_page) {
         search.per_page = parseInt(data.meta.per_page)
@@ -87,15 +84,6 @@ export class App extends React.Component {
       }
     })
   }
-
-  // onPageChange(e, data) {
-  //   this.setState({
-  //     search: {
-  //       ...this.state.search,
-  //       page: data.activePage
-  //     }
-  //   })
-  // }
   
   componentDidMount() {
     this.load()
@@ -117,7 +105,6 @@ export class App extends React.Component {
     }
 
     if(JSON.stringify(this.state.search) != JSON.stringify(prevState.search)) {
-      console.log("PUSH HISTORY", this.state.search)
       this.props.history.push(
         qs.stringify(this.state.search, { addQueryPrefix: true })
       )
@@ -126,29 +113,9 @@ export class App extends React.Component {
     }
   }
 
-  // renderPagination() {
-  //   const {page, per_page} = qs.parse(this.props.location.search, {ignoreQueryPrefix: true})
-
-  //   var activePage  = page || 1
-  //   var perPage     = per_page || 20
-  //   var totalPages  = activePage
-
-  //   if (this.state.results.length >= perPage) {
-  //     totalPages = activePage + 1
-  //   }
-
-  //   return (
-  //     <Pagination
-  //       activePage={activePage}
-  //       totalPages={totalPages}
-  //       onPageChange={this.onPageChange}
-  //     />
-  //   )
-  // }
 
   onChangePage(page) {
     // update state with new page of items
-    console.log("ON PAGE CHANGE")
     this.setState({
       search: {
         ...this.state.search,
@@ -167,12 +134,10 @@ export class App extends React.Component {
     if (this.state.results.length >= perPage) {
       totalPages = currentPage + 1
     }
-    var total = this.state.results.length //totalPages * perPage
+    var total = this.state.results.length 
     
     if (this.state.results.length > 0) {
-      // var {current_page, last_page, total} = this.state.list.meta;
-      // console.log('CurPage = ', currentPage)
-      // console.log('totalPages = ', totalPages)
+
       return (
         <PaginatedList location={this.props.location} currentPage={currentPage} pageSize={this.state.search.perPage} totalPages={totalPages} totalItems={total} onChangePage={this.onChangePage} /> 
       )

@@ -16,7 +16,12 @@
     left: 20px;
   };
 
+
   .column {
+    .card {
+      width: 100%;
+    }
+    
     .truncated {
       white-space: nowrap;
       overflow:hidden; 
@@ -41,6 +46,7 @@
         z-index: 1;
 
         img {
+          object-fit: cover;
           width: auto;
           max-height: 100%;
           max-width: 100%;
@@ -69,13 +75,15 @@
           color: #fff;
         }
 
+        .columns {
+          margin: 0;
+        }
+
         .column {
           &:first-child {
             margin: {
               top: 0;
-              right: 4px;
               bottom: 8px;
-              left: 14px;
             }
           }
 
@@ -83,9 +91,7 @@
             text-align: right;
             margin: {
               top: 0;
-              right: 14px;
               bottom: 8px;
-              left: 4px;
             }
           }
         }

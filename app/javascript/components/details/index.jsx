@@ -6,29 +6,13 @@
 //  Copyright 2020 FrenzyLabs LLC.
 //
 
-// import './details.scss'
-
 import React from 'react'
-
-import {
-  Button,
-  Header,
-  Image,
-  Modal
-} from 'semantic-ui-react'
 
 
 export default class extends React.Component {
-  backgroundImage(url) {
-    let lurl  = (url == null || url.length == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
 
-    return {
-      backgroundImage:    `url(${lurl})`,
-      backgroundSize:     "cover",
-      backgroundRepeat:   "no-repeat",
-      backgroundPosition: "50% 0",
-      height:             '90vh'
-    }
+  imageSrc(url) {
+    return (url == null || url.length == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
   }
 
   renderHeader() {
@@ -63,7 +47,8 @@ export default class extends React.Component {
 
   renderImage() {
     return (
-      <figure className="image is-16by9 details-image" style={this.backgroundImage(this.props.item.image_url)}>
+      <figure className="details-image" >
+        <img src={this.imageSrc(this.props.item.image_url)} />
       </figure>
     )
   }
@@ -72,13 +57,13 @@ export default class extends React.Component {
     return (
       <div className="details-description">
         <div className="columns">
-          <div className="column">
-            <p style={{marginRight: '10px'}}>
-              {this.props.item.description.split("\n").map((item, idx) => <span key={idx}>{item}<br/></span>)}
+          <div className="column is-8">
+            <p style={{marginRight: '10px', overflowWrap: 'break-word'}}>
+              {(this.props.item.description || "").split("\n").map((item, idx) => <span key={idx}>{item}<br/></span>)}
             </p>
           </div>
 
-          <div className="column is-3">
+          <div className="column is-4">
             <div className="buttons">
               <a 
                 className="button is-success is-fullwidth"
@@ -115,7 +100,7 @@ export default class extends React.Component {
   render() {
     return(
       <div id="details" className="columns is-centered">
-        <div className="column is-8 details-body">
+        <div className="details-body">
           {this.renderHeader()}
 
           {this.renderImage()}

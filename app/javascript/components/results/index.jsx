@@ -27,20 +27,18 @@ export default class extends React.Component {
 
   modalEsc(e) {
     if(e.keyCode === 27) {
+      e.preventDefault()
+      e.stopPropagation()
       this.setState({presentedItem: null})  
     }    
   }
 
   escToggle() {
-    // if(this.state.presentedItem) {
-    //   document.addEventListener("keypress", this.modalEsc, false)
-
-    //   Array.prototype.slice.call(document.querySelectorAll('.modal-background')).forEach((el) => {
-    //     el.addEventListener('click', this.modalEsc)
-    //   })
-    // } else {
-    //   document.removeEventListener("keypress", this.modalEsc, false)
-    // }
+    if(this.state.presentedItem) {
+      document.addEventListener("keypress", this.modalEsc, false)
+    } else {
+      document.removeEventListener("keypress", this.modalEsc, false)
+    }
   }
 
   componentDidMount() {
@@ -53,22 +51,11 @@ export default class extends React.Component {
   }
 
   componentWillUnmount() {
-    // document.removeEventListener("keypress", this.modalEsc, false)
+    document.removeEventListener("keypress", this.modalEsc, false)
   }
 
   thingImage(url) {
-    let lurl  = (url == null || url.length == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
-    return lurl
-  }
-  backgroundImage(url) {
-    let lurl  = (url == null || url.length == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
-
-    return {
-      backgroundImage:    `url(${lurl})`,
-      backgroundSize:     "cover",
-      backgroundRepeat:   "no-repeat",
-      backgroundPosition: "50% 0"
-    }
+    return (url == null || url.length == 0) ? "/assets/image-placeholder.png" : url.replace(/(thumb_)(medium)(\.)/, '$1large$3')
   }
 
   get(id) {
@@ -85,7 +72,7 @@ export default class extends React.Component {
 
   renderColumn(key, item) {
     return (
-      <div key={key} className="column is-one-third is-narrow">
+      <div key={key} className="column is-one-quarter-desktop is-one-third-tablet is-half-mobile is-narrow">
         <div className="card">
           <a className="card-image" href={`/things/${item.id}`} onClick={(e) => {
             e.preventDefault()
@@ -133,22 +120,15 @@ export default class extends React.Component {
     )
   }
 
-
-  render() {
-    this.escToggle()
-    
-    return (
-      <div>
-        <div id="results" className="container">
-          <div className="columns is-multiline is-centered">
-            {this.props.items && this.props.items.map((item, index) => this.renderColumn(index, item))}
-          </div>
-        </div>
-
+  renderModal() {
+    if (this.state.presentedItem) {
+      return (
         <div 
           className={`modal ${this.state.presentedItem == null ? '' : 'is-active'}`} 
         >
-          <div className="modal-background"></div>
+          <div className="modal-background" onClick={() => {
+            this.setState({presentedItem: null})
+          }}></div>
 
           <div className="modal-content container is-fluid">
             {this.state.presentedItem && (
@@ -161,6 +141,22 @@ export default class extends React.Component {
             onClick={() => this.setState({presentedItem: null})}>
           </button>
         </div>
+      
+      )
+    }
+  }
+
+  render() {
+
+    return (
+      <div>
+        <div id="results" className="container">
+          <div className="columns is-multiline is-centered is-mobile">
+            {this.props.items && this.props.items.map((item, index) => this.renderColumn(index, item))}
+          </div>
+        </div>
+
+        {this.renderModal()}
       </div>
     )
   }

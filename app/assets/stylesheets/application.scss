@@ -27,3 +27,9 @@ body {
   background: #f7f7f7;
   font-family: 'Nexa';
 }
+
+.modal .modal-content {
+  width: auto;
+  max-width: 85vw;
+  flex-grow: 0;
+}

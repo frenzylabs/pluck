@@ -41,7 +41,6 @@ class PaginatedList extends React.Component {
   componentDidUpdate(prevProps, prevState) {
       if (this.props.totalItems !== prevProps.totalItems ||
         this.props.pageSize !== prevProps.pageSize || this.props.currentPage != prevProps.currentPage) {
-          console.log("Pagdidupate", this.props, prevProps)
           this.setPage(null, this.props.currentPage);
       }
   }
@@ -64,9 +63,7 @@ class PaginatedList extends React.Component {
 
     // call change page function in parent component
     if (this.props.onChangePage) {
-      console.log("Change Page")
       if (e) {
-        console.log("STOP PAGE RELOAD")
         e.preventDefault()
         e.stopPropagation()
         this.props.onChangePage(page);
