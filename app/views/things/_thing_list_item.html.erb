@@ -1,0 +1,37 @@
+  <%
+    url = thing[:attributes]["image_url"] 
+    lurl = (url == nil || url.length == 0) ? "/assets/image-placeholder.png" : url.gsub(/(thumb_)(medium)(\.)/, '\1large\3') 
+  %>
+
+<div class="column" style="overflow:hidden;cursor: pointer" data-id=<%=thing[:id]%>>
+  <div class="ui card">
+    <div class="ui blurring image" style="background-image: url('<%= lurl %>'); background-size: cover; background-repeat: no-repeat; background-position: 50% 0;">
+    <div class="ui dimmer">
+      <div class="card-hover-content">
+        <div class="card-hover-content-inner">
+          <div style="display:flex; flex: 1;">
+              <div class="card-hover-description">
+                <p class="card-hover-content-truncate"><%= thing[:attributes]["description"] %></p>
+              </div>
+
+              <div class="hover-link">
+                <a class="ui icon button" href="#">
+                  <i class="large upload icon"></i>
+                </a>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <img src="<%= lurl %>%" style="opacity: 0">
+    </div>
+
+    <div class="content">
+      <div class="description hover-name"><%= thing[:attributes]["name"] %> </div>
+      <div class="meta" style="display:none"><%= thing[:attributes]["description"] %> </div>
+    </div>
+
+  </div>
+  
+</div>

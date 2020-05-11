@@ -1,0 +1,12 @@
+#
+#  Procfile.dev
+#  pluck
+# 
+#  Created by Wess Cope (wess@frenzylabs.com) on 04/22/20
+#  Copyright 2020 FrenzyLabs LLC.
+#
+
+web: bundle exec rails s
+webpacker: ./bin/webpack-dev-server
+#elastic: kubectl -n elastic-system port-forward service/layerkeep-es-http 9200:9200
+#pg: kubectl -n thingsearch port-forward service/postgres 5433:5432     

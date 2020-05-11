@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pluck - 3D Model Search</title>
+    <%= favicon_link_tag asset_path('favicon.ico') %>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>
+    
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_pack_tag     'application' %>
+    
+    <meta name="viewport" content="width=800">
+    
+    <meta name="description" content="3D model files to help you start 3D printing">
+    
+    <script>
+      window.currentEnv = <%= (current_env && raw(current_env.to_json)) || {"domains": {"thingiverse": "https://thingiverse.com", "layerkeep": "https://layerkeep.com"}} %>
+    </script>
+    
+  </head>
+
+  <body>
+    <main>
+      <nav class="ui top fixed secondary small menu">
+        <div class="header item">
+          <h1>Pluck</h1>
+        </div>
+
+        <div class="header item" style="font-weight: normal; padding-top: 15px; padding-left: 0">
+          <p style="color: rgba(0, 0, 0, 0.8)"><i>Find your next 3D print</i></p>
+        </div>
+
+        <div class="item"></div>
+
+        <div class="item search" style="flex: 1">
+          <form class="ui form" style="width: 100%">
+            <div class="ui large icon input" style="width: 100%">
+              <input type="text" name="q" placeholder="Search">
+              <i class="search icon"></i>
+            </div>
+          </form>
+        </div>
+
+        <div class="item"></div>
+
+        <div class="right menu">
+          <div class="item"></div>
+
+          <div class="item" style="padding-right:30px">
+            <a href="https://layerkeep.com" target="_blank" style="color: #016936">
+              <h3>LayerKeep &rarr;</h3>
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <section id="app" class="ui container">
+        <%= yield %>
+      </section>
+    </main>
+
+    <script>
+      $('.special.cards .image').dimmer({
+        on: 'hover'
+      })
+    </script>
+  </body>
+</html>

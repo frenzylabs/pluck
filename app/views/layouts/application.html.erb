@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="has-navbar-fixed-top">
   <head>
     <title>Pluck - 3D Model Search</title>
     <%= favicon_link_tag asset_path('favicon.ico') %>
@@ -18,8 +18,10 @@
     </script>
 
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%# <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag     'application' %>
+    
+    
     
     <meta name="viewport" content="width=800">
     
@@ -31,19 +33,9 @@
     
   </head>
 
-  <body>
+  <body class="has-navbar-fixed-top">
     <div id="app">
-      <div id="master-detail" class="ui fluid container">
-        <div class="ui stretched equal width grid main-content">
-          <div id="left-menu" class="three wide column">
-            <%= render "shared/left_menu" %>
-          </div>
-          <div id="master-content" class="column">
-            <%= yield %>
-          </div>
-        </div>
-      </div>
+      <%= yield %>
     </div>
-
   </body>
 </html>

@@ -22,3 +22,6 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+
+bundle config build.pg --with-pg-config=/usr/pgsql-9.1/bin/pg_config
