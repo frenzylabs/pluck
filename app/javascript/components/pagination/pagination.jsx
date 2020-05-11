@@ -9,7 +9,6 @@
 import React from 'react';
 import qs from 'qs'
 
-// import { Container, Breadcrumb, BreadcrumbItem, Pagination, PageControl, PageList, Page, PageLink, PageEllipsis }    from 'bloomer';
 import PropTypes from 'prop-types';
 
 const propTypes = {

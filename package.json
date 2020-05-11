@@ -7,7 +7,6 @@
     "babel-cli": "6",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "babel-preset-react-app": "3",
-    "bloomer": "^0.6.5",
     "bulma": "^0.8.2",
     "jquery": "^3.5.0",
     "popper.js": "^1.16.1",
