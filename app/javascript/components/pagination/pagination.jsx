@@ -138,7 +138,7 @@ class PaginatedList extends React.Component {
     }
 
     return (
-        <div className="container is-fluid">
+        <div id="pagination" className="container is-fluid">
           <nav className="pagination is-centered">
             <a className="pagination-previous" {...(pager.currentPage <= 1  ? {disabled: true} : "")} onClick={(e) => this.setPage(e, pager.currentPage-1)} >Previous</a>
             <a className="pagination-next" {...(pager.currentPage >= pager.totalPages ? {disabled: true} : "")} onClick={(e) => this.setPage(e, pager.currentPage + 1)}>Next</a>
