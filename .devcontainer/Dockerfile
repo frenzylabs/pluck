@@ -1,0 +1,1 @@
+from localhost/frenzylabs:latest 

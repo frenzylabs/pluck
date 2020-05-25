@@ -1,0 +1,41 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.117.1/containers/kubernetes-helm
+{
+	"name": "Pluck",
+	// "dockerFile": "Dockerfile",
+	// "image": "localhost/frenzylabs:latest",
+	"dockerComposeFile": ["./docker-compose.yml"],
+	"service": "pluck",
+	// "shutdownAction": "none",
+	
+	// Open the sub-folder with the source code
+	"workspaceFolder": "/frenzylabs",
+	"localWorkspaceFolder": "../../",
+
+	"settings": { 
+		"terminal.integrated.shell.linux": "/bin/zsh"
+	},
+
+	"postCreateCommand": "cd /frenzylabs/pluck && direnv allow",
+
+	"runArgs": ["--network=host", "--privileged"]
+
+	// "mounts": [
+	// 	"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+	// 	"source=${env:HOME}${env:USERPROFILE}/.kube,target=/root/.kube,type=bind",
+	// 	"source=${env:HOME}${env:USERPROFILE}/.ssh,target=/root/.ssh,type=bind",
+	// 	"source=${env:HOME}${env:USERPROFILE}/.gnupg,target=/root/.gnupg,type=bind",
+	// 	"source=${localWorkspaceFolder},target=/frenzylabs,type=bind",
+	// 	"source=frenzylabs-bashhistory,target=/commandhistory,type=volume"
+	// 	// Uncomment the next line to also sync certs in your .minikube folder
+	// 	// "source=${env:HOME}${env:USERPROFILE}/.minikube,target=/root/.minikube-localhost,type=bind"
+	// ],
+
+	// "remoteEnv": {
+	// 	"SYNC_LOCALHOST_KUBECONFIG": "true",
+	// 	"MY_REMOTE_TEST1": "${containerEnv:DIGITALOCEAN_ACCESS_TOKEN}",
+	// 	"MY_REMOTE_VARIABLE": "some-other-value-here",
+	// 	"MY_REMOTE_VARIABLE2": "${localEnv:DIGITALOCEAN_ACCESS_TOKEN}"
+	// }
+
+  }

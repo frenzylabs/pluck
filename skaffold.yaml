@@ -3,8 +3,40 @@ kind: Config
 metadata:
   name: pluck
 profiles:
-  - name: web
-    activation: 
+  - name: prod
+    deploy:
+      helm:
+        flags:
+          install:
+            - --create-namespace
+          upgrade:
+            - --install
+            - --create-namespace
+        releases:
+        - name: web
+          useHelmSecrets: true
+          namespace: pluck
+          chartPath: ../layerkeep-infra/charts/pluck/pluck-web
+          wait: true
+          # artifactOverrides:
+          #   image: localhost/pluck:5baa5553
+          # values:
+          #   image: registry.digitalocean.com/frenzylabs/pluck:5baa5553
+          valuesFiles:
+            # - /frenzylabs/layerkeep-infra/charts/pluck/pluck-web/values.yaml
+            - values.local.yaml
+          imageStrategy:
+            helm: {}
+
+    portForward:
+      - resourceType: service
+        namespace: pluck
+        resourceName: web-pluck-web
+        port: 80
+        localPort: 3001
+        
+  - name: dev
+    activation:
     - env: RAILS_ENV=development
     build:
       tagPolicy:
@@ -46,7 +78,7 @@ profiles:
         namespace: pluck
         resourceName: web-pluck-web
         port: 80
-        localPort: 3002
+        localPort: 3001
 
 
 #   - name: web

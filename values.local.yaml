@@ -6,13 +6,13 @@ replicaCount: 1
 
 image:
   repository: registry.digitalocean.com/frenzylabs/pluck
-  tag: a633ced
+  tag: 5baa5553
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
   - name: registry-frenzylabs
 
-args: ['foreman', 'start', '-f', 'Procfile.dev', '-p', '3002']
+args: ['foreman', 'start', '-f', 'Procfile.dev', '-p', '3001']
 
 nameOverride: ""
 fullnameOverride: ""

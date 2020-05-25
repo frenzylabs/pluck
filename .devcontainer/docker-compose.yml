@@ -1,0 +1,30 @@
+version: '3'
+services:
+  pluck:
+    container_name: pluck
+    # build:
+    #   context: ../
+    #   dockerfile: .devcontainer/Dockerfile.dev
+    image: "localhost/frenzylabs:latest"
+    volumes:
+      # Mount the root folder that contains .git
+      - ../:/frenzylabs/pluck:cached
+      - ../../layerkeep-infra:/frenzylabs/layerkeep-infra:cached
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ${HOME}/.kube:/root/.kube
+      - ${HOME}/.ssh:/root/.ssh
+      - ${HOME}/.gnupg:/root/.gnupg
+      - pluck-bashhistory:/commandhistory
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    environment:
+      RAILS_ENV: ${RAILS_ENV:-development}
+      PG_HOST: host.docker.internal
+      PG_USERNAME: ${PG_USERNAME:-postgres}
+      PG_PASSWORD: ${PG_PASSWORD:-''}
+      PG_DATABASE: ${PG_DATABASE:-layerkeep}
+      DIGITALOCEAN_ACCESS_TOKEN: ${DIGITALOCEAN_ACCESS_TOKEN:-''}
+
+    # ...
+
+volumes: 
+  pluck-bashhistory:
