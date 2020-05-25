@@ -28,7 +28,7 @@ export class App extends React.Component {
       kind: 'text',
       search: {
         page:     parseInt(page) || 1,
-        per_page: parseInt(per_page) || 21,
+        per_page: parseInt(per_page) || 20,
         q:        q
       },
       searchTerm: q || "",
@@ -90,6 +90,9 @@ export class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    if (this.state.results != prevState.results) {
+      window.scrollTo(0, 0)
+    }
     if(this.props.location.search != prevProps.location.search) { 
       const {page, per_page, q} = qs.parse(this.props.location.search, {ignoreQueryPrefix: true})
       
@@ -144,17 +147,26 @@ export class App extends React.Component {
     }
   }
 
+  renderResults() {
+    if (this.state.loading) {
+      return (<div class="container"><div class="spinner is-loading">&nbsp;</div></div>)
+    } else {
+      return (
+        <Results
+          {...this.props}
+          items={this.state.results}
+          search={this.state.search}
+        />
+      )
+    }
+  }
+
   render() {
     return (
       <div style={{paddingBottom: '300px'}}>
         <TopNav disabled={this.state.loading} handleSearch={this.search}/>
 
-        <Results
-          {...this.props}
-
-          items={this.state.results}
-          search={this.state.search}
-        />
+        {this.renderResults()}
 
         {this.renderPagination()}
 

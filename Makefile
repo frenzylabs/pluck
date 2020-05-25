@@ -1,8 +1,9 @@
 
 all: dev
 
+PORT=${PORT:-3001}
 dev:
-	@foreman start -f Procfile.dev -p 3000
+	@foreman start -f Procfile.dev -p ${PORT}
 
 build:
 	$(eval PL_COMMIT=$(shell git --git-dir=./.git rev-parse --short HEAD))

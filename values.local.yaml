@@ -1,0 +1,138 @@
+# Default values for pluck-web.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: registry.digitalocean.com/frenzylabs/pluck
+  tag: a633ced
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: registry-frenzylabs
+
+args: ['foreman', 'start', '-f', 'Procfile.dev', '-p', '3002']
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+deployment:
+  extraEnvs:
+    - name: DEPLOY_ENVIRONMENT
+      value: staging
+    - name: RAILS_ENV
+      value: development
+    - name: WEB_CONCURRENCY
+      value: "1"
+    - name: RAILS_MAX_THREADS
+      value: "1"
+    - name: PG_HOST
+      value: host.docker.internal #postgres.pluck.svc.cluster.local
+    - name: PG_USERNAME
+      value: postgres
+    - name: PG_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres
+          key: password
+    - name: PG_DATABASE
+      value: thingisearch
+    - name: PG_PORT
+      value: "5432"
+    - name: LAYERKEEP_DOMAIN
+      value: https://layerkeep.dev
+    - name: ELASTIC_PWD
+      value: test
+    - name: ELASTICSEARCH_URL
+      value: "https://elastic:$(ELASTIC_PWD)@layerkeep-es-http.elastic-system.svc.cluster.local:9200"
+    - name: MODEL_SEARCH_DOMAIN
+      value: "http://gateway.openfaas.svc.cluster.local:8080"
+    - name: RAILS_LOG_TO_STDOUT
+      value: "true"
+    - name: RAILS_SERVE_STATIC_FILES
+      value: "true"
+    - name: MIXPANEL_TOKEN
+      value: "2424f09396a8104a463a4a7b3dca2786"
+
+          
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: 1024Mi
+    requests:
+      cpu: "500m"
+      memory: 256Mi
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+
+ingress:
+  enabled: false
+#   name: pluck-ingress
+#   annotations:
+#     kubernetes.io/ingress.class: nginx
+#     cert-manager.io/cluster-issuer: letsencrypt-issuer
+#     kubernetes.io/tls-acme: 'true'
+#     nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#     nginx.ingress.kubernetes.io/proxy-buffering: "off"
+#     nginx.ingress.kubernetes.io/proxy-buffer-size: "2k"
+#     nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+#     nginx.ingress.kubernetes.io/connection-proxy-header: "keep-alive"
+#     nginx.ingress.kubernetes.io/proxy-connect-timeout: "200"
+#     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+#     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+#     # nginx.ingress.kubernetes.io/proxy-body-size: 200M
+    
+
+#   hosts:
+#     - host: pluck.layerkeep.dev
+#       http:
+#         paths:
+#         - backend:
+#             serviceName: pluck-web
+#             servicePort: 80
+#           path: /
+#   tls:
+#     - secretName: letsencrypt-web-ingress
+#       hosts:
+#       - pluck.layerkeep.dev
+
+
