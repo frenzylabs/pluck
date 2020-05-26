@@ -5,7 +5,7 @@ services:
     # build:
     #   context: ../
     #   dockerfile: .devcontainer/Dockerfile.dev
-    image: "localhost/frenzylabs:latest"
+    image: "frenzylab/devcontainer:latest"
     volumes:
       # Mount the root folder that contains .git
       - ../:/frenzylabs/pluck:cached
