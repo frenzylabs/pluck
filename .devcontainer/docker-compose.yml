@@ -1,11 +1,11 @@
 version: '3'
 services:
   pluck:
-    container_name: pluck
-    # build:
-    #   context: ../
-    #   dockerfile: .devcontainer/Dockerfile.dev
-    image: "frenzylab/devcontainer:latest"
+    container_name: pluck-devcontainer
+    build:
+      context: ../
+      dockerfile: .devcontainer/Dockerfile
+    image: "localhost/pluck-devcontainer:latest"
     volumes:
       # Mount the root folder that contains .git
       - ../:/frenzylabs/pluck:cached
