@@ -22,7 +22,7 @@ export class App extends React.Component {
     super(props)
 
     const {page, per_page, q} = qs.parse(this.props.location.search, {ignoreQueryPrefix: true})
-
+    console.log("Q = ", q)
     this.state = {
       loading: false,
       kind: 'text',
@@ -149,7 +149,7 @@ export class App extends React.Component {
 
   renderResults() {
     if (this.state.loading) {
-      return (<div class="container"><div class="spinner is-loading">&nbsp;</div></div>)
+      return (<div className="container"><div className ="spinner is-loading">&nbsp;</div></div>)
     } else {
       return (
         <Results
@@ -164,7 +164,7 @@ export class App extends React.Component {
   render() {
     return (
       <div style={{paddingBottom: '300px'}}>
-        <TopNav disabled={this.state.loading} handleSearch={this.search}/>
+        <TopNav disabled={this.state.loading} term={this.state.search.q} handleSearch={this.search} />
 
         {this.renderResults()}
 

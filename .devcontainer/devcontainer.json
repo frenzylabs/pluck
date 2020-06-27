@@ -16,6 +16,8 @@
 		"terminal.integrated.shell.linux": "/bin/zsh"
 	},
 
+	"forwardPorts": [3001],
+
 	"postCreateCommand": "cd /frenzylabs/pluck && direnv allow",
 
 	"runArgs": ["--network=host", "--privileged"]
