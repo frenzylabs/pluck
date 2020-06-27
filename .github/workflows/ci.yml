@@ -101,7 +101,7 @@ jobs:
 
       - name: Build docker build image
         run: |
-          docker build -f ${ROOT_DIR}/Dockerfile -t ${IMAGE} .
+          docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
           docker run --rm \
             -v ${PWD}/vendor/bundle:/var/www/pluck/bundlecache \
             -v ${PWD}/public:/var/www/pluck/publiccache \
