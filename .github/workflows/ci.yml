@@ -116,18 +116,18 @@ jobs:
 
 #IMAGE=${BUILD_IMAGE} ./layerkeep/scripts/ci.sh docker_build_target
 
-      # - name: Install doctl
-      #   uses: digitalocean/action-doctl@v2
-      #   with:
-      #     token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      # - name: Log in to DigitalOcean Container Registry with short-lived credentials
-      #   run: doctl registry login
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login
 
       # - name: Push docker image
       #   id: build-image
       #   run: |
-      #       docker push ${BUILD_IMAGE}
+      #       docker push ${IMAGE}
       #       echo "::set-output name=build_image::${BUILD_IMAGE}"
       #     echo "TAG: ${TAG}" >> build_env.txt
       #     echo "TARGET: ${TARGET}" >> build_env.txt
