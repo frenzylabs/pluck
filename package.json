@@ -1,5 +1,6 @@
 {
   "name": "pluck",
+  "version": "0.0.1",
   "private": true,
   "dependencies": {
     "@babel/preset-react": "^7.0.0",
@@ -22,6 +23,7 @@
     "truncate.js": "jeffchan/truncate.js"
   },
   "devDependencies": {
+    "generate-changelog": "^1.8.0",
     "webpack-dev-server": "^3.10.3"
   }
 }

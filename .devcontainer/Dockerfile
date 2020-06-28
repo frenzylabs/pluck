@@ -1,4 +1,4 @@
-from frenzylab/devcontainer:latest 
+FROM frenzylab/devcontainer:latest 
 
 
 RUN set -eux; \
@@ -12,10 +12,20 @@ RUN set -eux; \
 		libyaml-dev \
 		procps \
 		zlib1g-dev \
-	; \
-	rm -rf /var/lib/apt/lists/*
+		libpq-dev \
+		cmake \
+		libmagic-dev \
+		pkg-config \
+		npm
+		
+	
 
+RUN rm -rf /var/lib/apt/lists/*
 # skip installing gem documentation
+RUN npm install yarn --global
+# RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
+# RUN curl -o- -L https://yarnpkg.com/install.sh | bash
+
 RUN set -eux; \
 	mkdir -p /usr/local/etc; \
 	{ \
@@ -109,3 +119,4 @@ ENV BUNDLE_SILENCE_ROOT_WARNING=1 \
 ENV PATH $GEM_HOME/bin:$PATH
 # adjust permissions of a few directories for running "gem install" as an arbitrary user
 RUN mkdir -p "$GEM_HOME" && chmod 777 "$GEM_HOME"
+

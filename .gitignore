@@ -42,3 +42,6 @@ yarn-debug.log*
 
 /public/models
 .env.do
+
+
+values.local.yaml
