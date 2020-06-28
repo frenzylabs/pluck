@@ -21,6 +21,7 @@ $(eval $(RUN_ARGS):;@:)
 release:	
 	echo ${RUN_ARGS}
 	yarn version --${RUN_ARGS}
+	git push origin --follow-tags
 
 prune-tags:
 	git tag -l | xargs git tag -d && git fetch -t 
