@@ -13,291 +13,242 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # container:
-    #   image: frenzylab/devcontainer:latest
-      # env:
-      #   XDG_DATA_HOME: "/root/.local/share/"  # HELM plugin path
-        # PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-      # volumes:
-      #   - /usr/bin:/usr/bin
     outputs:      
       target: ${{ steps.buildenv.outputs.target }}
       tag: ${{ steps.buildenv.outputs.tag }}
       build_image: ${{ steps.build-image.outputs.build_image }}
         
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          # path: './layerkeep'
-          persist-credentials: false
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
 
-      - name: Set release version info
-        if: github.event_name == 'release'
-        run: |
-          echo "::set-env name=VERSION::${{ github.event.release.tag_name }}"
-          echo "::set-env name=TARGET::prod"
+#       - name: Checkout
+#         uses: actions/checkout@v2
+#         with:
+#           # path: './layerkeep'
+#           persist-credentials: false
+
+#       - name: Set release version info
+#         if: github.event_name == 'release'
+#         run: |
+#           echo "::set-env name=VERSION::${{ github.event.release.tag_name }}"
+#           echo "::set-env name=TARGET::prod"
       
-      - name: Set commit version info
-        if: github.event_name == 'push'
-        run: |
-          echo "::set-env name=VERSION::$(echo "$GITHUB_SHA" | cut -c1-7)"
-          echo "::set-env name=TARGET::staging"
+#       - name: Set Build Commit Version Info
+#         if: github.event_name == 'push' && github.ref != 'refs/heads/master'
+#         run: |
+#           echo "::set-env name=VERSION::build-$(echo "$GITHUB_SHA" | cut -c1-7)"
+#           echo "::set-env name=TARGET::staging"
 
-      - name: Set PR version info
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "::set-env name=VERSION::pr-${{ github.event.pull_request.number }}"
-          echo "::set-env name=TARGET::staging"
+#       - name: Set Staging Commit Version Info
+#         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+#         run: |
+#           echo "::set-env name=VERSION::$(echo "$GITHUB_SHA" | cut -c1-7)"
+#           echo "::set-env name=TARGET::staging"
 
-      - name: Set build info
-        run: |
-          TAG=${TARGET}-${VERSION}-build
-          echo "::set-env name=TAG::${TAG}"
-          echo "::set-env name=IMAGE::${IMAGE_REPOSITORY}:${TAG}"
-          echo "::set-env name=CLUSTER_KEY::DO_${TARGET^^}_CLUSTER"
-          
+#       - name: Set PR version info
+#         if: github.event_name == 'pull_request'
+#         run: |
+#           echo "::set-env name=VERSION::pr-${{ github.event.pull_request.number }}"
+#           echo "::set-env name=TARGET::staging"
 
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: |
-            **/node_module_cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+#       - name: Set build info
+#         run: |
+#           TAG=${TARGET}-${VERSION}
+#           echo "::set-env name=TAG::${TAG}"
+#           echo "::set-env name=IMAGE::${IMAGE_REPOSITORY}:${TAG}"
+#           echo "::set-env name=CLUSTER_KEY::DO_${TARGET^^}_CLUSTER"
 
-      - name: Cache gems
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-gems
-        with:
-          path: |
-            **/vendor/cache
-            **/vendor/bundle
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/Gemfile.lock') }}
-            ${{ runner.os }}-
+#       - name: Cache node modules
+#         uses: actions/cache@v2
+#         env:
+#           cache-name: cache-node-modules
+#         with:
+#           # npm cache files are stored in `~/.npm` on Linux/macOS
+#           path: |
+#             **/node_module_cache
+#           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+#             ${{ runner.os }}-build-${{ env.cache-name }}-
+#             ${{ runner.os }}-build-
+#             ${{ runner.os }}-
+
+#       - name: Cache gems
+#         uses: actions/cache@v2
+#         env:
+#           cache-name: cache-gems
+#         with:
+#           path: |
+#             **/vendor/cache
+#             **/vendor/bundle
+#           key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/Gemfile.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/Gemfile.lock') }}
+#             ${{ runner.os }}-
             
-      - name: Cache assets
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-assets
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: |
-            **/public
-          key: ${{ runner.os }}-build-${{ env.cache-name }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}
-            ${{ runner.os }}-
+#       - name: Cache assets
+#         uses: actions/cache@v2
+#         env:
+#           cache-name: cache-assets
+#         with:
+#           # npm cache files are stored in `~/.npm` on Linux/macOS
+#           path: |
+#             **/public
+#           key: ${{ runner.os }}-build-${{ env.cache-name }}
+#           restore-keys: |
+#             ${{ runner.os }}-build-${{ env.cache-name }}
+#             ${{ runner.os }}-
 
-      - name: Build docker build image
-        run: |
-          docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
-          docker run --rm \
-            -v ${PWD}/vendor/bundle:/var/www/pluck/bundlecache \
-            -v ${PWD}/public:/var/www/pluck/publiccache \
-            ${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
-            
+#       - name: Build docker build image
+#         run: |
+#           docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
+#           docker run --rm \
+#             -v ${PWD}/vendor/bundle:/var/www/pluck/bundlecache \
+#             -v ${PWD}/public:/var/www/pluck/publiccache \
+#             ${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
+
+#           docker run --rm \
+#             -v ${PWD}/node_module_cache:/var/www/pluck/nodecache \
+#             ${IMAGE} /bin/sh -c "cp -rf node_modules/* nodecache/"
+
+# #IMAGE=${BUILD_IMAGE} ./layerkeep/scripts/ci.sh docker_build_target
+
+#       - name: Install doctl
+#         uses: digitalocean/action-doctl@v2
+#         with:
+#           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+#       - name: Log in to DigitalOcean Container Registry with short-lived credentials
+#         run: doctl registry login
+
+#       - name: Push docker image
+#         id: build-image
+#         run: |
+#             docker push ${IMAGE}
+#             echo "::set-output name=build_image::${IMAGE}"
+#             echo "TAG: ${TAG}" >> build_env.txt
+#             echo "TARGET: ${TARGET}" >> build_env.txt
+#             echo "IMAGE: ${IMAGE}" >> build_env.txt
+
+#       - name: Upload Build Artifacts
+#         uses: actions/upload-artifact@v1
+#         if: ${{ always() }}
+#         with:
+#           name: build_info
+#           path: build_env.txt
+
+#       - id: buildenv
+#         if: ${{ always() }}
+#         run: |
+#           echo "::set-output name=target::${TARGET}"
+#           echo "::set-output name=tag::${TAG}"
           
-          echo "Image= ${IMAGE}"
-          echo $(ls ${PWD}/node_module_cache)
-          docker run --rm \
-            -v ${PWD}/node_module_cache:/var/www/pluck/nodecache \
-            ${IMAGE} /bin/sh -c "cp -rf node_modules/* nodecache/"
+      
+#       # - name: test
+#       #   run: |
+#       #     echo "SECRET NAMe= ${CLUSTER_KEY}"                    
+#       #     echo "envclusterkey= ${{ env.CLUSTER_KEY }}"
+#       #     SECRET_VALUE="${{ secrets[env.CLUSTER_KEY] }}"
+#       #     echo "SECRET_VALUE = $SECRET_VALUE"
 
-#IMAGE=${BUILD_IMAGE} ./layerkeep/scripts/ci.sh docker_build_target
+#         # env:
+#         #   SECRET_PREFIX: A
+#         #   SECRET_NAME: "DO_${TARGET^^}_CLUSTER"
 
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Log in to DigitalOcean Container Registry with short-lived credentials
-        run: doctl registry login
-
-      - name: Push docker image
-        id: build-image
-        run: |
-            docker push ${IMAGE}
-            echo "::set-output name=build_image::${IMAGE}"
-
-      #     echo "TAG: ${TAG}" >> build_env.txt
-      #     echo "TARGET: ${TARGET}" >> build_env.txt
-      #     echo "BUILD_IMAGE: ${BUILD_IMAGE}" >> build_env.txt
+#   deploy:
+#     if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.event_name == 'release'
+#     needs: build
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         shell: bash
+#     container:
+#       image: frenzylab/devcontainer:latest
+#       env:
+#         XDG_DATA_HOME: "/root/.local/share/"
+#     steps:
+#       - name: Install pip
+#         run: apt install -y python3-pip
     
+#       - name: Set env
+#         run: |
+#           echo "::set-env name=TARGET::${{ needs.build.outputs.target }}"
+#           echo "::set-env name=TAG::${{ needs.build.outputs.tag }}"
+#           echo "::set-env name=BUILD_IMAGE::${{ needs.build.outputs.build_image }}"
 
 
-      #     echo ${ASSET_IMAGE}
-      #     echo "ASSET_IMAGE: ${ASSET_IMAGE}" >> build_env.txt
+#   # #     # - name: set env vars
+#   # #     #   shell: bash
+#   # #     #   run: |
+#   # #     #     cat build_info/build_env.txt;
+#   # #     #     source <(grep -v '^#' build_info/build_env.txt | sed -E 's|^([^:]+):\s*(.*)$|\1="\2"; export \1|g')
 
-      # - name: Upload Build Artifacts
-      #   uses: actions/upload-artifact@v1
-      #   if: ${{ always() }}
-      #   with:
-      #     name: build_info
-      #     path: build_env.txt
-
-      - id: buildenv
-        if: ${{ always() }}
-        run: |
-          echo "::set-output name=target::${TARGET}"
-          echo "::set-output name=tag::${TAG}"
-          
-      
-      # - name: test
-      #   run: |
-      #     echo "SECRET NAMe= ${CLUSTER_KEY}"                    
-      #     echo "envclusterkey= ${{ env.CLUSTER_KEY }}"
-      #     SECRET_VALUE="${{ secrets[env.CLUSTER_KEY] }}"
-      #     echo "SECRET_VALUE = $SECRET_VALUE"
-
-        # env:
-        #   SECRET_PREFIX: A
-        #   SECRET_NAME: "DO_${TARGET^^}_CLUSTER"
-          
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-    container:
-      image: frenzylab/devcontainer:latest
-      env:
-        XDG_DATA_HOME: "/root/.local/share/"
-    steps:
-      - name: Install pip
-        run: apt install -y python3-pip
-
-  # #     # - name: Download build info
-  # #     #   uses: actions/download-artifact@v1
-  # #     #   with:
-  # #     #     name: build_info
-
-  # #     # - name: test job outputs
-  # #     #   run: |
-  # #     #     BUILDENV = ${{ fromJSON(needs.build.outputs.buildenv)
-  # #     #     echo "TESTTARGET = ${{ needs.build.outputs.target }}"
-  # #     #     echo "JTAG = ${{ needs.build.outputs.tag }}"
-  # #     #     echo "TARGET = ${{ fromJSON(needs.build.outputs.buildenv).target }}"
-      
-      - name: Set env
-        run: |
-          echo "::set-env name=TARGET::${{ needs.build.outputs.target }}"
-          echo "::set-env name=TAG::${{ needs.build.outputs.tag }}"
-          echo "::set-env name=BUILD_IMAGE::${{ needs.build.outputs.build_image }}"
-
-  # #     - name: Set K8s cluster        
-  # #       run: |
-  # #         clusters
-
-  # #     # - name: set env vars
-  # #     #   shell: bash
-  # #     #   run: |
-  # #     #     cat build_info/build_env.txt;
-  # #     #     source <(grep -v '^#' build_info/build_env.txt | sed -E 's|^([^:]+):\s*(.*)$|\1="\2"; export \1|g')
-
-  #     # - name: test env
-  #     #   run: |
-  #     #     echo "TARGEt= $TARGET"
-  #     #     echo "TAG= $TAG"
-  #     #     echo "BUILD_IMAGE= $BUILD_IMAGE"
-  #     #     echo "ASSET_IMAGE= $ASSET_IMAGE"
-
-      - name: Check out layerkeep infra
-        uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.FL_WORKFLOW_PAT }}
-          path: layerkeep-infra
-          fetch-depth: 0
-          persist-credentials: false
-          repository: frenzylabs/layerkeep-infra
+#       - name: Check out layerkeep infra
+#         uses: actions/checkout@v2
+#         with:
+#           token: ${{ secrets.FL_WORKFLOW_PAT }}
+#           path: layerkeep-infra
+#           fetch-depth: 0
+#           persist-credentials: false
+#           repository: frenzylabs/layerkeep-infra
 
 
-      - name: Configure AWS credentials from Test account
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.CI_AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.CI_AWS_ACCESS_SECRET }}
-          aws-region: us-east-1
+#       - name: Configure AWS credentials from Test account
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.CI_AWS_ACCESS_KEY }}
+#           aws-secret-access-key: ${{ secrets.CI_AWS_ACCESS_SECRET }}
+#           aws-region: us-east-1
 
-      - name: set bashrc
-        run: |
-          echo "PWD = $PWD"
-          ls 
+#       - name: Set KUBECONFIG
+#         working-directory: ./layerkeep-infra
+#         run: |
+#           echo "::set-env name=KUBECONFIG::${PWD}/${TARGET}/config"
 
-      #   run: echo 'eval "$(direnv hook zsh)"' >> "/root/.bashrc"
+#       - name: doctl auth
+#         run: doctl auth init -t ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Set KUBECONFIG
-        working-directory: ./layerkeep-infra
-        run: |
-          echo "::set-env name=KUBECONFIG::${PWD}/${TARGET}/config"
+#       - name: Update pluck infra chart values
+#         run: |
+#           sed -i -E "s/^([[:space:]]*)(tag:.*$)/\1tag: ${TAG}/g" ./layerkeep-infra/charts/pluck/pluck-web/values.${TARGET}.yaml
 
-      - name: doctl auth
-        run: doctl auth init -t ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+#       - name: Create Pull Request
+#         id: cpr
+#         uses: peter-evans/create-pull-request@v2
+#         with:
+#           token: ${{ secrets.FL_WORKFLOW_PAT }}
+#           path: layerkeep-infra
+#           commit-message: Update ${{ github.event.repository.name }} ${{ env.TARGET }} Config
+#           branch: "${{ env.TARGET }}-${{ github.event.repository.name }}"
+#           base: master
+#           committer: GitHub <action@github.com>
+#           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+#           title: '${{ github.event.repository.name }} : ${{ env.TARGET }}'
+#           body: |
+#             New ${{ env.TARGET }} Config
+#             - Contains *today's* date
+#             - Auto-generated by [create-pull-request][1]
 
-  #     - name: test
-  #       working-directory: ./layerkeep-infra
-  #       run: |
-  #         kubectl config get-contexts
-  #         kubectl config current-context
-  #         make ${TARGET} get-pods
-
-
-      - name: Update pluck infra chart values
-        run: |
-          sed -i -E "s/^([[:space:]]*)(tag:.*$)/\1tag: ${TAG}/g" ./layerkeep-infra/charts/pluck/pluck-web/values.${TARGET}.yaml
-
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v2
-        with:
-          token: ${{ secrets.FL_WORKFLOW_PAT }}
-          path: layerkeep-infra
-          commit-message: Update ${{ github.event.repository.name }} ${{ env.TARGET }} Config
-          branch: "${{ env.TARGET }}-${{ github.event.repository.name }}"
-          base: master
-          committer: GitHub <action@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          title: '${{ env.TARGET }} - ${{ github.event.repository.name }} Config'
-          body: |
-            New ${{ env.TARGET }} Config
-            - Contains *today's* date
-            - Auto-generated by [create-pull-request][1]
-
-            [1]: https://github.com/peter-evans/create-pull-request
-          labels: ${{ github.event.repository.name }}, automated pr, ${{ env.TARGET }}
-          team-reviewers: owners, maintainers
-          # milestone: 1
-          draft: false
+#             [1]: https://github.com/peter-evans/create-pull-request
+#           labels: ${{ github.event.repository.name }}, automated pr, ${{ env.TARGET }}
+#           team-reviewers: owners, maintainers
+#           draft: false
 
 
-  # #     - name: set bashrc
-  # #       run: echo 'eval "$(direnv hook zsh)"' >> "/root/.bashrc"
+#       - name: Set kubernetes cluster
+#         working-directory: ./layerkeep-infra
+#         run: |
+#           make ${TARGET} get-pods
 
+# # doctl kubernetes cluster kubeconfig save layerkeep1-nyc3
 
-      - name: Set kubernetes cluster
-        working-directory: ./layerkeep-infra
-        run: |
-          make ${TARGET} get-pods
-
-# doctl kubernetes cluster kubeconfig save layerkeep1-nyc3
-
-      - name: Deploy to Kubernetes 
-        working-directory: ./layerkeep-infra
-        run: |
-          echo $PWD
-          make ${TARGET} setup-pluck-web
+#       - name: Deploy to Kubernetes 
+#         working-directory: ./layerkeep-infra
+#         run: make ${TARGET} setup-pluck-web
 
 
 
