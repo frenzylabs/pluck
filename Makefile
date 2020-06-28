@@ -13,3 +13,12 @@ build:
 push:
 	$(eval PL_COMMIT=$(shell git --git-dir=./.git rev-parse --short HEAD))	
 	docker push registry.digitalocean.com/frenzylabs/pluck:${PL_COMMIT}
+
+
+RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+$(eval $(RUN_ARGS):;@:)
+
+release:	
+	echo ${RUN_ARGS}
+	yarn version --${RUN_ARGS}
+	
