@@ -90,7 +90,7 @@ RUN git config --global user.email web@layerkeep.com && git config --global user
 # VOLUME [ "${RAILS_ROOT}/public"]
 
 
-EXPOSE 3000
+EXPOSE 3001
 
 
 CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
