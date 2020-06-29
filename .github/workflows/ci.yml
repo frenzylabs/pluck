@@ -127,7 +127,7 @@ jobs:
         run: doctl registry login
 
       - name: Push docker image
-        if: github.event_name != "pull_request"
+        if: github.event_name != 'pull_request'
         id: build-image
         run: |
             docker push ${IMAGE}
