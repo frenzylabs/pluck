@@ -18,7 +18,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
     outputs:      
       target: ${{ steps.buildenv.outputs.target }}
       tag: ${{ steps.buildenv.outputs.tag }}
@@ -41,7 +40,7 @@ jobs:
           COMMIT_FILTER: 'v\d+\.\d+\.[^\s]+$'
         run: | 
           # Get last commit message
-          readonly local last_commit_log=${{ github.event.head_commit.message }}
+          readonly local last_commit_log="${{ github.event.head_commit.message }}"
           echo "last commit log: $last_commit_log"
     
           readonly local filter_count=$(echo "$last_commit_log" | grep -c -P "$COMMIT_FILTER" )
