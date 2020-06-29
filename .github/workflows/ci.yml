@@ -34,48 +34,12 @@ jobs:
         with:
           # path: './layerkeep'
           persist-credentials: true     
-      
-      # - name: last tag
-      #   id: lasttag
-      #   if: github.event_name == 'push' && ${{ startsWith(github.ref, 'refs/tags/v') }}
-      #   run: |
-      #     git fetch --tags -f
-      #     LAST_TAG=$(git tag --sort=-creatordate | head -n 2 | tail -n 1)
-      #     echo "::set-output name=last_tag::${LAST_TAG}"
-
-      # - name: changelog
-      #   uses: scottbrenner/generate-changelog-action@master
-      #   if: github.event_name == 'push' && ${{ startsWith(github.ref, 'refs/tags/v') }}
-      #   id: Changelog
-      #   with:
-      #     args: "-t ${{ steps.lasttag.outputs.last_tag }}"
-      #   env:
-      #     REPO: ${{ github.repository }}
-
-      # - name: Create Release
-      #   id: create_release
-      #   if: github.event_name == 'push' && ${{ startsWith(github.ref, 'refs/tags/v') }}
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.FL_WORKFLOW_PAT }} # This token is provided by Actions, you do not need to create your own token
-      #   with:
-      #     tag_name: ${{ github.ref }}
-      #     release_name: Release ${{ github.ref }}
-      #     body: |
-      #       ${{ steps.Changelog.outputs.changelog }}
-      #     draft: false
-      #     prerelease: false
 
       - name: Set release version info
         if: github.event_name == 'release'
         run: |
           echo "THIS IS A RELEASE"
 
-#       - name: Checkout
-#         uses: actions/checkout@v2
-#         with:
-#           # path: './layerkeep'
-#           persist-credentials: false
 
 #       - name: Set release version info
 #         if: github.event_name == 'release'
