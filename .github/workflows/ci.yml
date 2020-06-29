@@ -111,14 +111,19 @@ jobs:
       - name: Build docker build image
         run: |
           docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
+
+      - name: Copy to Cache Dirs
+        run: |
           docker run --rm \
             -v ${PWD}/vendor/bundle:/var/www/pluck/bundlecache \
             -v ${PWD}/public:/var/www/pluck/publiccache \
             ${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
 
+          echo ${IMAGE}
           docker run --rm \
             -v ${PWD}/node_module_cache:/var/www/pluck/nodecache \
             ${IMAGE} /bin/sh -c "cp -rf node_modules/* nodecache/"
+
 
 #IMAGE=${BUILD_IMAGE} ./layerkeep/scripts/ci.sh docker_build_target
 
