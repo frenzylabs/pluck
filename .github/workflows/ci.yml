@@ -44,7 +44,7 @@ jobs:
         if: github.event_name == 'release'
         run: |
           echo "::set-env name=VERSION::${{ github.event.release.tag_name }}"
-          echo "::set-env name=TARGET::prod"
+          echo "::set-env name=TARGET::staging"
       
       - name: Set Build Commit Version Info
         if: github.event_name == 'push' && github.ref != 'refs/heads/master'
@@ -71,74 +71,74 @@ jobs:
           echo "::set-env name=IMAGE::${IMAGE_REPOSITORY}:${TAG}"
           echo "::set-env name=CLUSTER_KEY::DO_${TARGET^^}_CLUSTER"
 
-#       - name: Cache node modules
-#         uses: actions/cache@v2
-#         env:
-#           cache-name: cache-node-modules
-#         with:
-#           # npm cache files are stored in `~/.npm` on Linux/macOS
-#           path: |
-#             **/node_module_cache
-#           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-#           restore-keys: |
-#             ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-#             ${{ runner.os }}-build-${{ env.cache-name }}-
-#             ${{ runner.os }}-build-
-#             ${{ runner.os }}-
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: |
+            **/node_module_cache
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
-#       - name: Cache gems
-#         uses: actions/cache@v2
-#         env:
-#           cache-name: cache-gems
-#         with:
-#           path: |
-#             **/vendor/cache
-#             **/vendor/bundle
-#           key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/Gemfile.lock') }}
-#           restore-keys: |
-#             ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/Gemfile.lock') }}
-#             ${{ runner.os }}-
+      - name: Cache gems
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-gems
+        with:
+          path: |
+            **/vendor/cache
+            **/vendor/bundle
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/Gemfile.lock') }}
+            ${{ runner.os }}-
             
-#       - name: Cache assets
-#         uses: actions/cache@v2
-#         env:
-#           cache-name: cache-assets
-#         with:
-#           # npm cache files are stored in `~/.npm` on Linux/macOS
-#           path: |
-#             **/public
-#           key: ${{ runner.os }}-build-${{ env.cache-name }}
-#           restore-keys: |
-#             ${{ runner.os }}-build-${{ env.cache-name }}
-#             ${{ runner.os }}-
+      - name: Cache assets
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-assets
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: |
+            **/public
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}
+            ${{ runner.os }}-
 
-#       - name: Build docker build image
-#         run: |
-#           docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
-#           docker run --rm \
-#             -v ${PWD}/vendor/bundle:/var/www/pluck/bundlecache \
-#             -v ${PWD}/public:/var/www/pluck/publiccache \
-#             ${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
+      - name: Build docker build image
+        run: |
+          docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
+          docker run --rm \
+            -v ${PWD}/vendor/bundle:/var/www/pluck/bundlecache \
+            -v ${PWD}/public:/var/www/pluck/publiccache \
+            ${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
 
-#           docker run --rm \
-#             -v ${PWD}/node_module_cache:/var/www/pluck/nodecache \
-#             ${IMAGE} /bin/sh -c "cp -rf node_modules/* nodecache/"
+          docker run --rm \
+            -v ${PWD}/node_module_cache:/var/www/pluck/nodecache \
+            ${IMAGE} /bin/sh -c "cp -rf node_modules/* nodecache/"
 
-# #IMAGE=${BUILD_IMAGE} ./layerkeep/scripts/ci.sh docker_build_target
+#IMAGE=${BUILD_IMAGE} ./layerkeep/scripts/ci.sh docker_build_target
 
-#       - name: Install doctl
-#         uses: digitalocean/action-doctl@v2
-#         with:
-#           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-#       - name: Log in to DigitalOcean Container Registry with short-lived credentials
-#         run: doctl registry login
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login
 
-      # - name: Push docker image
-      #   id: build-image
-      #   run: |
-      #       docker push ${IMAGE}
-      #       echo "::set-output name=build_image::${IMAGE}"
+      - name: Push docker image
+        id: build-image
+        run: |
+            docker push ${IMAGE}
+            echo "::set-output name=build_image::${IMAGE}"
 
       - name: Set Artifacts
         run: |            
