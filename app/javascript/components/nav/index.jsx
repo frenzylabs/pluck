@@ -11,6 +11,8 @@ import Logo   from '../../assets/images/pluck-logo.svg'
 
 // import "./nav.scss";
 
+import qs from 'qs'
+
 class TopNav extends React.Component {
   state = {
     term: ""
@@ -19,9 +21,20 @@ class TopNav extends React.Component {
   constructor(props) {
     super(props)
 
+    if (this.props.location && this.props.location.search) {
+      const {q} = qs.parse(this.props.location.search, {ignoreQueryPrefix: true})
+      this.state.term = q
+    }
+
     this.updateTerm = this.updateTerm.bind(this)
     this.search     = this.search.bind(this)
     this.renderForm = this.renderForm.bind(this)
+  }
+
+  UNSAFE_componentWillMount() {
+    if (this.props.term !== this.state.term) {
+      this.setState({term: this.props.term})
+    }
   }
 
   updateTerm(e) {
