@@ -1,0 +1,54 @@
+name: CreateRelease
+
+on:
+  push:
+    branches-ignore:
+      - '**'
+    tags:
+      - 'v**'
+
+
+jobs:
+  create_release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      
+      - name: last tag
+        id: lasttag
+        run: |
+          git fetch --tags -f
+          LAST_TAG=$(git tag --sort=-creatordate | head -n 2 | tail -n 1)
+          echo "::set-output name=last_tag::${LAST_TAG}"
+
+      - name: changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+        with:
+          args: "-t ${{ steps.lasttag.outputs.last_tag }}"
+        env:
+          REPO: ${{ github.repository }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.FL_WORKFLOW_PAT }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ${{ steps.Changelog.outputs.changelog }}
+          draft: false
+          prerelease: false

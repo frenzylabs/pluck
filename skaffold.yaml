@@ -1,55 +1,28 @@
-apiVersion: skaffold/v2beta3
+apiVersion: skaffold/v2beta4
 kind: Config
 metadata:
   name: pluck
 profiles:
-  - name: prod
-    deploy:
-      helm:
-        flags:
-          install:
-            - --create-namespace
-          upgrade:
-            - --install
-            - --create-namespace
-        releases:
-        - name: web
-          useHelmSecrets: true
-          namespace: pluck
-          chartPath: ../layerkeep-infra/charts/pluck/pluck-web
-          wait: true
-          # artifactOverrides:
-          #   image: localhost/pluck:5baa5553
-          # values:
-          #   image: registry.digitalocean.com/frenzylabs/pluck:5baa5553
-          valuesFiles:
-            # - /frenzylabs/layerkeep-infra/charts/pluck/pluck-web/values.yaml
-            - values.local.yaml
-          imageStrategy:
-            helm: {}
-
-    portForward:
-      - resourceType: service
-        namespace: pluck
-        resourceName: web-pluck-web
-        port: 80
-        localPort: 3001
-        
   - name: dev
     activation:
     - env: RAILS_ENV=development
+      command: dev
     build:
       tagPolicy:
         gitCommit:
           prefix: dev-
       local: {}
       artifacts:
-      - image: pluck
+      - image: localhost/pluck
         docker:
-          dockerfile: Dockerfile.dev
+          dockerfile: Dockerfile
+          buildArgs:
+            RAILS_ENV: '{{.RAILS_ENV}}'
         sync:
+          # infer:
+          #   - '**'
           manual:
-            - src: "app/**"
+            - src: "*/**"
               dest: .
     deploy:
       helm:
@@ -60,161 +33,30 @@ profiles:
             - --install
             - --create-namespace
         releases:
-        - name: web
+        - name: pluck-web
           useHelmSecrets: true
           namespace: pluck
           chartPath: ../layerkeep-infra/charts/pluck/pluck-web
           wait: true
-          values:
-            image: pluck
+          artifactOverrides:
+            image: localhost/pluck
+          #   image: localhost/pluck:5baa5553
+          # values:
+          #   image: layerkeep
+          # setValues:
+          #   image.repository: layerkeep
+          #   image: registry.digitalocean.com/frenzylabs/pluck:5baa5553
           valuesFiles:
-            # - /frenzylabs/layerkeep-infra/charts/pluck/pluck-web/values.yaml
-            - values.local.yaml
+              - ../layerkeep-infra/charts/pluck/pluck-web/values.yaml
+              - ../layerkeep-infra/charts/pluck/pluck-web/values.local.yaml
+              - ./values.local.yaml
+              - ../layerkeep-infra/secrets/secrets.local.yaml
           imageStrategy:
             helm: {}
 
     portForward:
       - resourceType: service
         namespace: pluck
-        resourceName: web-pluck-web
+        resourceName: pluck-web
         port: 80
         localPort: 3001
-
-
-#   - name: web
-#     activation: 
-#     - env: DEV_ENV=localweb
-#     deploy:
-#       helm:
-#         flags:
-#           install:
-#             - --create-namespace
-#           upgrade:
-#             - --install
-#             - --create-namespace
-#         releases:
-#         - name: web
-#           useHelmSecrets: true
-#           namespace: pluck
-#           chartPath: /frenzylabs/layerkeep-infra/charts/pluck/pluck-web
-#           wait: true
-#           valuesFiles:
-#             - /frenzylabs/layerkeep-infra/charts/pluck/pluck-web/values.yaml
-#         - name: rabbitmq
-#           useHelmSecrets: true
-#           namespace: pluck
-#           chartPath: /frenzylabs/layerkeep-infra/charts/pluck/pluck-web
-#           wait: true
-#           valuesFiles:
-#               - /frenzylabs/layerkeep-infra/charts/pluck/pluck-web/values.yaml
-#               - charts/secrets.staging.yaml
-#         # - name: pg
-#         #   useHelmSecrets: true
-#         #   namespace: postgres
-#         #   chartPath: charts/postgres/stolon
-#         #   wait: true
-#         #   valuesFiles:
-#         #       - charts/postgres/stolon/values.yaml
-#         #       - charts/secrets.staging.yaml
-#         - name: web
-#           useHelmSecrets: true
-#           namespace: default
-#           chartPath: charts/layerkeep
-#           wait: true
-#           valuesFiles:
-#               - charts/layerkeep/values.yaml
-#               - charts/secrets.staging.yaml
-#   - name: pluck
-#     activation: 
-#     - env: DEV_ENV=localpluck
-#     deploy:
-#       # kubectl:
-#       #   manifests:
-#       #   - charts/elasticsearch/all-in-one-1.0.1.yaml
-#       helm:
-#         flags:
-#           install:
-#             - --create-namespace
-#           upgrade:
-#             - --install
-#             - --create-namespace
-#         releases:
-#         - name: elastic-operator
-#           useHelmSecrets: true
-#           namespace: elastic-system
-#           chartPath: charts/elasticsearch/elastic-operator
-#           wait: true
-#           valuesFiles:
-#               - charts/elasticsearch/elastic-operator/values.yaml
-#               - charts/secrets.staging.yaml            
-#         - name: elasticsearch
-#           useHelmSecrets: true
-#           namespace: elastic-system
-#           chartPath: charts/elasticsearch/es-cluster
-#           wait: true
-#           valuesFiles:
-#               - charts/elasticsearch/es-cluster/values.yaml
-#               - charts/secrets.staging.yaml 
-#         - name: postgres
-#           useHelmSecrets: true
-#           namespace: pluck
-#           chartPath: charts/pluck/postgres
-#           wait: true
-#           valuesFiles:
-#               - charts/pluck/postgres/values.yaml
-#               - charts/pluck/values.yaml
-#               - charts/secrets.staging.yaml
-#         - name: pluck-web
-#           useHelmSecrets: true
-#           namespace: pluck
-#           chartPath: charts/pluck/pluck-web
-#           wait: true
-#           valuesFiles:
-#               - charts/pluck/pluck-web/values.yaml
-#               - charts/pluck/values.yaml
-#               - charts/secrets.staging.yaml              
-#           # values:
-#           #   image: api-engine
-#           # flags:
-#           #   upgrade:
-#           #     - "--install"
-
-#         # - name: slic3r
-#         #   useHelmSecrets: true
-#         #   chartPath: charts/rabbitmq
-#         #   wait: true
-#         #   valuesFiles:
-#         #       - charts/rabbitmq/values.yaml
-#         #       - charts/secrets.staging.yaml              
-#           # values:
-#           #   image: api-engine
-          
-
-# # deploy:
-# #   helm:
-# #     releases:
-# #     - name: rabbitmq
-# #       useHelmSecrets: true
-# #       chartPath: charts/rabbitmq
-# #       wait: true
-# #       valuesFiles:
-# #           - charts/rabbitmq/values.yaml
-# #           - charts/secrets.staging.yaml
-# #       # values:
-# #       #   image: api-engine
-# #     flags:
-# #       upgrade:
-# #         - "--install"
-# #       #recreatePods will pass --recreate-pods to helm upgrade
-# #       #recreatePods: true
-# #       #overrides builds an override values.yaml file to run with the helm deploy
-# #       # overrides:
-# #       #   secrets: 
-# #       #     DB_HOST: "mysql"
-# #       #     DB_PASSWORD: "ec3aa18041"
-# #       #     DB_USERNAME: "soulcycle_stage"
-# #       #     DB_NAME: "soulcycle_stage"
-# #       #     DB_PORT: "3306"
-# #       #setValues get appended to the helm deploy with --set.
-# #       #setValues:
-# #         #some.key: someValue
