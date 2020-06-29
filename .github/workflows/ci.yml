@@ -3,7 +3,7 @@ name: CI
 on: 
   push:
     branches:
-      - '**'
+      - 'master'
     tags-ignore:
       - "**"
   pull_request:
@@ -32,7 +32,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          # path: './layerkeep'
           persist-credentials: true     
 
       - name: Set release version info
@@ -41,36 +40,36 @@ jobs:
           echo "THIS IS A RELEASE"
 
 
-#       - name: Set release version info
-#         if: github.event_name == 'release'
-#         run: |
-#           echo "::set-env name=VERSION::${{ github.event.release.tag_name }}"
-#           echo "::set-env name=TARGET::prod"
+      - name: Set release version info
+        if: github.event_name == 'release'
+        run: |
+          echo "::set-env name=VERSION::${{ github.event.release.tag_name }}"
+          echo "::set-env name=TARGET::prod"
       
-#       - name: Set Build Commit Version Info
-#         if: github.event_name == 'push' && github.ref != 'refs/heads/master'
-#         run: |
-#           echo "::set-env name=VERSION::build-$(echo "$GITHUB_SHA" | cut -c1-7)"
-#           echo "::set-env name=TARGET::staging"
+      - name: Set Build Commit Version Info
+        if: github.event_name == 'push' && github.ref != 'refs/heads/master'
+        run: |
+          echo "::set-env name=VERSION::build-$(echo "$GITHUB_SHA" | cut -c1-7)"
+          echo "::set-env name=TARGET::staging"
 
-#       - name: Set Staging Commit Version Info
-#         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-#         run: |
-#           echo "::set-env name=VERSION::$(echo "$GITHUB_SHA" | cut -c1-7)"
-#           echo "::set-env name=TARGET::staging"
+      - name: Set Staging Commit Version Info
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          echo "::set-env name=VERSION::$(echo "$GITHUB_SHA" | cut -c1-7)"
+          echo "::set-env name=TARGET::staging"
 
-#       - name: Set PR version info
-#         if: github.event_name == 'pull_request'
-#         run: |
-#           echo "::set-env name=VERSION::pr-${{ github.event.pull_request.number }}"
-#           echo "::set-env name=TARGET::staging"
+      - name: Set PR version info
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "::set-env name=VERSION::pr-${{ github.event.pull_request.number }}"
+          echo "::set-env name=TARGET::staging"
 
-#       - name: Set build info
-#         run: |
-#           TAG=${TARGET}-${VERSION}
-#           echo "::set-env name=TAG::${TAG}"
-#           echo "::set-env name=IMAGE::${IMAGE_REPOSITORY}:${TAG}"
-#           echo "::set-env name=CLUSTER_KEY::DO_${TARGET^^}_CLUSTER"
+      - name: Set build info
+        run: |
+          TAG=${TARGET}-${VERSION}
+          echo "::set-env name=TAG::${TAG}"
+          echo "::set-env name=IMAGE::${IMAGE_REPOSITORY}:${TAG}"
+          echo "::set-env name=CLUSTER_KEY::DO_${TARGET^^}_CLUSTER"
 
 #       - name: Cache node modules
 #         uses: actions/cache@v2
@@ -135,27 +134,31 @@ jobs:
 #       - name: Log in to DigitalOcean Container Registry with short-lived credentials
 #         run: doctl registry login
 
-#       - name: Push docker image
-#         id: build-image
-#         run: |
-#             docker push ${IMAGE}
-#             echo "::set-output name=build_image::${IMAGE}"
-#             echo "TAG: ${TAG}" >> build_env.txt
-#             echo "TARGET: ${TARGET}" >> build_env.txt
-#             echo "IMAGE: ${IMAGE}" >> build_env.txt
+      # - name: Push docker image
+      #   id: build-image
+      #   run: |
+      #       docker push ${IMAGE}
+      #       echo "::set-output name=build_image::${IMAGE}"
 
-#       - name: Upload Build Artifacts
-#         uses: actions/upload-artifact@v1
-#         if: ${{ always() }}
-#         with:
-#           name: build_info
-#           path: build_env.txt
+      - name: Set Artifacts
+        run: |            
+            echo "TAG: ${TAG}" >> build_env.txt
+            echo "TARGET: ${TARGET}" >> build_env.txt
+            echo "IMAGE: ${IMAGE}" >> build_env.txt
 
-#       - id: buildenv
-#         if: ${{ always() }}
-#         run: |
-#           echo "::set-output name=target::${TARGET}"
-#           echo "::set-output name=tag::${TAG}"
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v1
+        if: ${{ always() }}
+        with:
+          name: build_info
+          path: build_env.txt
+
+      - name: Build Output
+        id: buildenv
+        if: ${{ always() }}
+        run: |
+          echo "::set-output name=target::${TARGET}"
+          echo "::set-output name=tag::${TAG}"
           
       
 #       # - name: test
@@ -169,34 +172,27 @@ jobs:
 #         #   SECRET_PREFIX: A
 #         #   SECRET_NAME: "DO_${TARGET^^}_CLUSTER"
 
+
   deploy:
     if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.event_name == 'release'
+    needs: build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    container:
+      image: frenzylab/devcontainer:latest
+      env:
+        XDG_DATA_HOME: "/root/.local/share/"
     steps:
-      - name: TEST
-        run: |
-          echo ${{ github.event_name }}
-
-#   deploy:
-#     if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.event_name == 'release'
-#     needs: build
-#     runs-on: ubuntu-latest
-#     defaults:
-#       run:
-#         shell: bash
-#     container:
-#       image: frenzylab/devcontainer:latest
-#       env:
-#         XDG_DATA_HOME: "/root/.local/share/"
-#     steps:
-#       - name: Install pip
-#         run: apt install -y python3-pip
+      - name: Install pip
+        run: apt install -y python3-pip
     
-#       - name: Set env
-#         run: |
-#           echo "::set-env name=TARGET::${{ needs.build.outputs.target }}"
-#           echo "::set-env name=TAG::${{ needs.build.outputs.tag }}"
-#           echo "::set-env name=BUILD_IMAGE::${{ needs.build.outputs.build_image }}"
+      - name: Set env
+        run: |
+          echo "::set-env name=TARGET::${{ needs.build.outputs.target }}"
+          echo "::set-env name=TAG::${{ needs.build.outputs.tag }}"
+          echo "::set-env name=BUILD_IMAGE::${{ needs.build.outputs.build_image }}"
 
 
 #   # #     # - name: set env vars
@@ -205,68 +201,67 @@ jobs:
 #   # #     #     cat build_info/build_env.txt;
 #   # #     #     source <(grep -v '^#' build_info/build_env.txt | sed -E 's|^([^:]+):\s*(.*)$|\1="\2"; export \1|g')
 
-#       - name: Check out layerkeep infra
-#         uses: actions/checkout@v2
-#         with:
-#           token: ${{ secrets.FL_WORKFLOW_PAT }}
-#           path: layerkeep-infra
-#           fetch-depth: 0
-#           persist-credentials: false
-#           repository: frenzylabs/layerkeep-infra
+      - name: Check out layerkeep infra
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.FL_WORKFLOW_PAT }}
+          path: layerkeep-infra
+          fetch-depth: 0
+          persist-credentials: false
+          repository: frenzylabs/layerkeep-infra
 
 
-#       - name: Configure AWS credentials from Test account
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.CI_AWS_ACCESS_KEY }}
-#           aws-secret-access-key: ${{ secrets.CI_AWS_ACCESS_SECRET }}
-#           aws-region: us-east-1
+      - name: Configure AWS credentials from Test account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.CI_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.CI_AWS_ACCESS_SECRET }}
+          aws-region: us-east-1
 
-#       - name: Set KUBECONFIG
-#         working-directory: ./layerkeep-infra
-#         run: |
-#           echo "::set-env name=KUBECONFIG::${PWD}/${TARGET}/config"
+      - name: Set KUBECONFIG
+        working-directory: ./layerkeep-infra
+        run: |
+          echo "::set-env name=KUBECONFIG::${PWD}/${TARGET}/config"
 
-#       - name: doctl auth
-#         run: doctl auth init -t ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: doctl auth
+        run: doctl auth init -t ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-#       - name: Update pluck infra chart values
-#         run: |
-#           sed -i -E "s/^([[:space:]]*)(tag:.*$)/\1tag: ${TAG}/g" ./layerkeep-infra/charts/pluck/pluck-web/values.${TARGET}.yaml
+      - name: Update pluck infra chart values
+        run: |
+          sed -i -E "s/^([[:space:]]*)(tag:.*$)/\1tag: ${TAG}/g" ./layerkeep-infra/charts/pluck/pluck-web/values.${TARGET}.yaml
 
-#       - name: Create Pull Request
-#         id: cpr
-#         uses: peter-evans/create-pull-request@v2
-#         with:
-#           token: ${{ secrets.FL_WORKFLOW_PAT }}
-#           path: layerkeep-infra
-#           commit-message: Update ${{ github.event.repository.name }} ${{ env.TARGET }} Config
-#           branch: "${{ env.TARGET }}-${{ github.event.repository.name }}"
-#           base: master
-#           committer: GitHub <action@github.com>
-#           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-#           title: '${{ github.event.repository.name }} : ${{ env.TARGET }}'
-#           body: |
-#             New ${{ env.TARGET }} Config
-#             - Contains *today's* date
-#             - Auto-generated by [create-pull-request][1]
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v2
+        with:
+          token: ${{ secrets.FL_WORKFLOW_PAT }}
+          path: layerkeep-infra
+          commit-message: Update ${{ github.event.repository.name }} ${{ env.TARGET }} Config
+          branch: "${{ env.TARGET }}-${{ github.event.repository.name }}"
+          base: master
+          committer: GitHub <action@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          title: '${{ github.event.repository.name }} : ${{ env.TARGET }}'
+          body: |
+            New ${{ env.TARGET }} Image
+            - Auto-generated by [create-pull-request][1]
 
-#             [1]: https://github.com/peter-evans/create-pull-request
-#           labels: ${{ github.event.repository.name }}, automated pr, ${{ env.TARGET }}
-#           team-reviewers: owners, maintainers
-#           draft: false
+            [1]: https://github.com/peter-evans/create-pull-request
+          labels: ${{ github.event.repository.name }}, automated pr, ${{ env.TARGET }}
+          team-reviewers: owners, maintainers
+          draft: false
 
 
-#       - name: Set kubernetes cluster
-#         working-directory: ./layerkeep-infra
-#         run: |
-#           make ${TARGET} get-pods
+      - name: Set kubernetes cluster
+        working-directory: ./layerkeep-infra
+        run: |
+          make ${TARGET} get-pods
 
-# # doctl kubernetes cluster kubeconfig save layerkeep1-nyc3
+# doctl kubernetes cluster kubeconfig save layerkeep1-nyc3
 
-#       - name: Deploy to Kubernetes 
-#         working-directory: ./layerkeep-infra
-#         run: make ${TARGET} setup-pluck-web
+      - name: Deploy to Kubernetes 
+        working-directory: ./layerkeep-infra
+        run: make ${TARGET} setup-pluck-web
 
 
 
