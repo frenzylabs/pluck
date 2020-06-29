@@ -38,7 +38,7 @@ jobs:
       - name: dont rebuild tagged commits
         if: github.event_name == 'push'
         env:
-          COMMIT_FILTER: "v\d+\.\d+\.[^\s]+$"
+          COMMIT_FILTER: 'v\d+\.\d+\.[^\s]+$'
         run: | 
           # Get last commit message
           readonly local last_commit_log=${{ github.event.head_commit.message }}
