@@ -55,8 +55,8 @@ RUN npm install yarn --global
 ENV RAILS_ROOT ${RAILS_ROOT:-/var/www/pluck}
 ENV APP_DIR=${RAILS_ROOT}/app
 
-RUN mkdir -p $RAILS_ROOT 
-RUN mkdir ${APP_DIR}
+# RUN mkdir -p $RAILS_ROOT 
+RUN mkdir -p ${APP_DIR}
 # Set working directory
 WORKDIR $RAILS_ROOT
 
@@ -120,7 +120,6 @@ COPY app/assets ${APP_DIR}/assets
 COPY app/javascript ${APP_DIR}/javascript
 COPY vendor/assets vendor/assets
 
-COPY public public
 
 RUN yarn config set cache-folder $RAILS_ROOT/yarn_cache
 
@@ -128,7 +127,7 @@ RUN yarn config set cache-folder $RAILS_ROOT/yarn_cache
 FROM asset-files as assets-dev
 
 RUN mount=type=cache,target=$RAILS_ROOT/yarn_cache yarn install --check-files --update-checksums
-RUN 
+
 
 
 FROM asset-files as assets-prod
@@ -177,6 +176,7 @@ RUN mount=type=cache,target=./public/assets,target=/public/packs SECRET_KEY_BASE
 # RUN if [ "$RAILS_ENV" = "production" ] ; then SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile; else echo "dev assets"; fi
 
 FROM assets-${TARGET_ENV} as assets
+RUN rm -rf tmp
 
 FROM assets-dev as finaldev
 
