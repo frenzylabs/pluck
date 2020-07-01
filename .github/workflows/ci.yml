@@ -143,7 +143,9 @@ jobs:
 
       - name: Build docker build image
         run: |
-          DOCKER_BUILDKIT=1 docker build -f Dockerfile.app  --cache-from ${ASSET_CACHE} -t ${IMAGE} --target final .
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile.app  --cache-from ${ASSET_CACHE} --cache-from ${IMAGE_LATEST} \
+          -t ${IMAGE} -t ${IMAGE_LATEST} --target final .
+
 # docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
 
       # - name: Copy to Cache Dirs
@@ -168,6 +170,7 @@ jobs:
         id: build-image
         run: |
             docker push ${IMAGE}
+            docker push ${IMAGE_LATEST}
             echo "::set-output name=build_image::${IMAGE}"
 
       - name: Set Artifacts
