@@ -142,7 +142,7 @@ jobs:
 
       - name: Build docker build image
         run: |
-          DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from ${ASSET_CACHE} -t ${IMAGE} --target final .
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile.app -t ${IMAGE} --target final .
 # docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
 
       # - name: Copy to Cache Dirs
