@@ -74,7 +74,7 @@ COPY Gemfile Gemfile
 COPY Gemfile.lock Gemfile.lock
 # RUN bundle install --jobs 20 --retry 5 --without test 
 RUN echo "HI"
-RUN mount=type=cache,target=./vendor/bundle bundle install --jobs 20 --retry 5 --without test
+RUN mount=type=cache,target=$RAILS_ROOT/vendor/bundle bundle install --jobs 20 --retry 5 --without test
 
 
 FROM main as gems-prod
@@ -83,7 +83,7 @@ COPY Gemfile Gemfile
 COPY Gemfile.lock Gemfile.lock
 # RUN bundle install --jobs 20 --retry 5 --without test 
 RUN echo "HI"
-RUN mount=type=cache,target=./vendor/bundle bundle install --deployment --jobs 20 --retry 5 --without test development
+RUN mount=type=cache,target=$RAILS_ROOT/vendor/bundle bundle install --deployment --jobs 20 --retry 5 --without test development
 # COPY ./vendor/bundle ./vendor/bundle
 # RUN if [ "$RAILS_ENV" = "production" ] ; then echo "prod" && bundle install --deployment --jobs 20 --retry 5 --without test development; else bundle install --jobs 20 --retry 5 --without test ; fi
 # # Adding project files
@@ -133,7 +133,7 @@ RUN mount=type=cache,target=$RAILS_ROOT/yarn_cache yarn install --check-files --
 FROM asset-files as assets-prod
 
 RUN mount=type=cache,target=$RAILS_ROOT/yarn_cache yarn install --check-files --production=true
-RUN mount=type=cache,target=./public/assets,target=/public/packs SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile
+RUN mount=type=cache,target=$RAILS_ROOT/public SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile
 
 # FROM gems as asset
 
@@ -184,6 +184,8 @@ COPY . .
 
 
 FROM main as final
+
+WORKDIR $RAILS_ROOT
 
 RUN echo "Rails root = ${RAILS_ROOT}"
 

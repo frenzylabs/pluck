@@ -83,6 +83,7 @@ jobs:
           TAG=${TARGET}-${VERSION}
           echo "::set-env name=TAG::${TAG}"
           echo "::set-env name=IMAGE::${IMAGE_REPOSITORY}:${TAG}"
+          echo "::set-env name=IMAGE_LATEST::${IMAGE_REPOSITORY}:${TARGET}-latest"
           echo "::set-env name=ASSET_CACHE::${IMAGE_REPOSITORY}:${TARGET}-assets"
           echo "::set-env name=CLUSTER_KEY::DO_${TARGET^^}_CLUSTER"
 
@@ -142,7 +143,7 @@ jobs:
 
       - name: Build docker build image
         run: |
-          DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --no-cache -t ${IMAGE} --target final .
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile.app -t ${IMAGE} --target final .
 # docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
 
       # - name: Copy to Cache Dirs

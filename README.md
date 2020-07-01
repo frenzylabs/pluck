@@ -24,6 +24,9 @@ Things you may want to cover:
 * ...
 
 Requirements:
+1. Login to aws in order to decrypt the keys.
+2. Set ENV: AWS_PROFILE=all
+
 
 Need postgres and elasticsearch services running.  You can also use kubectl port-forward to connect to remote instances.
 If you connect to staging you'll need to update values.local.yaml environment variables
