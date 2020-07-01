@@ -40,7 +40,8 @@ buildassets:
 	$(eval IMAGE=localhost/pluck:test10)
 	$(eval ASSET_IMAGE=localhost/assets:latest)
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest -t localhost/assets:latest --target assets . 
-	# DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest --build-arg BUILDKIT_INLINE_CACHE=1 -t localhost/assets:latest --target assets . 
+
+# DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest --build-arg BUILDKIT_INLINE_CACHE=1 -t localhost/assets:latest --target assets . 
 
 
 buildfinal:	
