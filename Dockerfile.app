@@ -74,22 +74,15 @@ FROM main as gems-dev
 COPY Gemfile Gemfile.lock ./
 RUN mount=type=cache,target=$RAILS_ROOT/vendor/bundle bundle install --jobs 20 --retry 5 --without test
 
+COPY package.json yarn.lock ./
+RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --update-checksums
+
 ## PROD BUNDLER
 FROM main as gems-prod
 
-RUN echo "Hey"
 COPY Gemfile Gemfile.lock ./
-# COPY Gemfile.lock Gemfile.lock
-# RUN bundle install --jobs 20 --retry 5 --without test 
-
-RUN which bundle
-RUN echo "$(pwd)"
-RUN ls "$(pwd)"
 
 RUN mount=type=cache,target=${RAILS_ROOT}/vendor/bundle bundle install --deployment --jobs 20 --retry 5 --without test development
-# COPY ./vendor/bundle ./vendor/bundle
-# RUN if [ "$RAILS_ENV" = "production" ] ; then echo "prod" && bundle install --deployment --jobs 20 --retry 5 --without test development; else bundle install --jobs 20 --retry 5 --without test ; fi
-# # Adding project files
 
 RUN find vendor/bundle/ruby/*/extensions \
         -type f -name "mkmf.log" -o -name "gem_make.out" | xargs rm -f \
@@ -103,7 +96,12 @@ RUN find vendor/bundle/ruby/*/extensions \
         \) | xargs rm -rf
 
 
-FROM gems-${TARGET_ENV} as asset-files
+COPY package.json yarn.lock ./
+RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --production=true
+
+
+
+FROM gems-${TARGET_ENV} as assets
 
 COPY package.json yarn.lock ./
 COPY bin bin
@@ -127,24 +125,27 @@ COPY vendor/assets vendor/assets
 
 RUN yarn config set cache-folder ${RAILS_ROOT}/yarn_cache
 
-
-### DEV ASSETS
-FROM asset-files as assets-dev
-
-RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --update-checksums
-
-
-### PROD ASSETS
-FROM asset-files as assets-prod
-
-RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --production=true
 RUN mount=type=cache,target=${RAILS_ROOT}/public SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile
 
-
-FROM assets-${TARGET_ENV} as assets
 RUN rm -rf tmp node_modules
 
-FROM assets-dev as finaldev
+# ### DEV ASSETS
+# FROM asset-files as assets-dev
+
+# RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --update-checksums
+
+
+# ### PROD ASSETS
+# FROM asset-files as assets-prod
+
+# RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --production=true
+# RUN mount=type=cache,target=${RAILS_ROOT}/public SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile
+
+
+# FROM assets-${TARGET_ENV} as assets
+# RUN rm -rf tmp node_modules
+
+FROM gems-dev as finaldev
 
 COPY . .
 
