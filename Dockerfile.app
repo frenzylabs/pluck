@@ -82,10 +82,11 @@ RUN mount=type=cache,target=$RAILS_ROOT/vendor/bundle bundle install --jobs 20 -
 
 FROM main as gems-prod
 
-COPY Gemfile Gemfile
-COPY Gemfile.lock Gemfile.lock
+RUN echo "Hey"
+COPY Gemfile Gemfile.lock ./
+# COPY Gemfile.lock Gemfile.lock
 # RUN bundle install --jobs 20 --retry 5 --without test 
-RUN echo "HI"
+
 RUN which bundle
 RUN echo "$(pwd)"
 RUN ls "$(pwd)"
