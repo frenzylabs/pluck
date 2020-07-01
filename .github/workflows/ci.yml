@@ -126,13 +126,14 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login          
 
       - name: Build Docker Assets
         run: |
           DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from ${ASSET_CACHE} --build-arg BUILDKIT_INLINE_CACHE=1 -t localhost/assets:latest --target assets .
 
-      - name: Log in to DigitalOcean Container Registry with short-lived credentials
-        run: doctl registry login
+
 
       - name: Push Assets
         run: |    
