@@ -88,8 +88,9 @@ COPY Gemfile.lock Gemfile.lock
 RUN echo "HI"
 RUN which bundle
 RUN echo "$(pwd)"
+RUN ls "$(pwd)"
 
-RUN mount=type=cache,target=/var/www/pluck/vendor/bundle cd ${RAILS_ROOT} && bundle install --deployment --jobs 20 --retry 5 --without test development
+RUN mount=type=cache,target=/var/www/pluck/vendor/bundle cd /var/www/pluck && bundle install --deployment --jobs 20 --retry 5 --without test development
 # COPY ./vendor/bundle ./vendor/bundle
 # RUN if [ "$RAILS_ENV" = "production" ] ; then echo "prod" && bundle install --deployment --jobs 20 --retry 5 --without test development; else bundle install --jobs 20 --retry 5 --without test ; fi
 # # Adding project files
