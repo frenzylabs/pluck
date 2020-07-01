@@ -70,8 +70,8 @@ RUN mkdir -p $RAILS_ROOT/vendor/bundle
 
 FROM main as gems-dev
 
-COPY Gemfile Gemfile
-COPY Gemfile.lock Gemfile.lock
+COPY Gemfile Gemfile.lock .
+# COPY Gemfile.lock Gemfile.lock
 # RUN bundle install --jobs 20 --retry 5 --without test 
 RUN echo ""
 RUN which bundle
