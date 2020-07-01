@@ -32,7 +32,7 @@ class TopNav extends React.Component {
   }
 
   UNSAFE_componentWillMount() {
-    this.setState({term: "test2"})
+    this.setState({term: "tada"})
     // if (this.props.term !== this.state.term) {
     //   this.setState({term: this.props.term})
     // }
