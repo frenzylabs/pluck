@@ -83,7 +83,7 @@ COPY Gemfile Gemfile
 COPY Gemfile.lock Gemfile.lock
 # RUN bundle install --jobs 20 --retry 5 --without test 
 RUN echo "HI"
-RUN mount=type=cache,target=$RAILS_ROOT/vendor/bundle bundle install --deployment --jobs 20 --retry 5 --without test development
+RUN mount=type=cache,target=${RAILS_ROOT}/vendor/bundle bundle install --deployment --jobs 20 --retry 5 --without test development
 # COPY ./vendor/bundle ./vendor/bundle
 # RUN if [ "$RAILS_ENV" = "production" ] ; then echo "prod" && bundle install --deployment --jobs 20 --retry 5 --without test development; else bundle install --jobs 20 --retry 5 --without test ; fi
 # # Adding project files
@@ -121,7 +121,7 @@ COPY app/javascript ${APP_DIR}/javascript
 COPY vendor/assets vendor/assets
 
 
-RUN yarn config set cache-folder $RAILS_ROOT/yarn_cache
+RUN yarn config set cache-folder ${RAILS_ROOT}/yarn_cache
 
 
 FROM asset-files as assets-dev
@@ -132,8 +132,8 @@ RUN mount=type=cache,target=$RAILS_ROOT/yarn_cache yarn install --check-files --
 
 FROM asset-files as assets-prod
 
-RUN mount=type=cache,target=$RAILS_ROOT/yarn_cache yarn install --check-files --production=true
-RUN mount=type=cache,target=$RAILS_ROOT/public SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile
+RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --production=true
+RUN mount=type=cache,target=${RAILS_ROOT}/public SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile
 
 # FROM gems as asset
 
@@ -194,10 +194,15 @@ COPY ./ ./
 RUN rm -rf vendor/assets app/assets node_modules yarn_cache;
 # RUN if [ "$RAILS_ENV" = "production" ] ; then rm -rf vendor/assets app/assets node_modules yarn_cache; fi
 
-COPY --from=localhost/assets:latest /usr/local/bundle /usr/local/bundle
-COPY --from=localhost/assets:latest ${RAILS_ROOT}/vendor/bundle vendor/bundle
-COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/assets public/assets
-COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/packs public/packs
+COPY --from=assets /usr/local/bundle /usr/local/bundle
+COPY --from=assets ${RAILS_ROOT}/vendor/bundle vendor/bundle
+COPY --from=assets ${RAILS_ROOT}/public/assets public/assets
+COPY --from=assets ${RAILS_ROOT}/public/packs public/packs
+
+# COPY --from=localhost/assets:latest /usr/local/bundle /usr/local/bundle
+# COPY --from=localhost/assets:latest ${RAILS_ROOT}/vendor/bundle vendor/bundle
+# COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/assets public/assets
+# COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/packs public/packs
 
 
 EXPOSE 3001
