@@ -109,18 +109,7 @@ jobs:
       #     key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('Gemfile.lock') }}
       #     restore-keys: |
       #       ${{ runner.os }}-${{ env.cache-name }}-
-            
-      # - name: Cache assets
-      #   uses: actions/cache@v2
-      #   env:
-      #     cache-name: cache-assets
-      #   with:
-      #     path: |
-      #       public
-      #       **/public
-      #     key: ${{ runner.os }}-cacheassets-${{ env.cache-name }}-${{ hashFiles('**/packs/manifest.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-cacheassets-${{ env.cache-name }}-
+
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -134,8 +123,6 @@ jobs:
         run: |
           DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from ${ASSET_CACHE} --build-arg BUILDKIT_INLINE_CACHE=1 -t localhost/assets:latest --target assets .
 
-
-
       - name: Push Assets
         run: |    
           docker tag localhost/assets:latest ${ASSET_CACHE}
@@ -148,22 +135,6 @@ jobs:
 
 # docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
 
-      # - name: Copy to Cache Dirs
-      #   run: |
-      #     docker run --rm \
-      #       -v ${PWD}/vendor/bundle:/var/www/pluck/bundlecache \
-      #       -v ${PWD}/public:/var/www/pluck/publiccache \
-      #       ${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
-
-      #     echo ${IMAGE}
-      #     docker run --rm \
-      #       -v ${PWD}/node_module_cache:/var/www/pluck/nodecache \
-      #       ${IMAGE} /bin/sh -c "cp -rf node_modules/* nodecache/"
-
-
-
-
-      
 
       - name: Push docker image
         if: github.event_name != 'pull_request'
@@ -195,7 +166,7 @@ jobs:
           
 
   deploy:
-    # if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.event_name == 'release'
+    if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.event_name == 'release'
     needs: build
     runs-on: ubuntu-latest
     defaults:
