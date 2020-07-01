@@ -199,18 +199,18 @@ RUN echo "Rails root = ${RAILS_ROOT}"
 
 COPY ./ ./
 
-RUN rm -rf vendor/assets app/assets node_modules yarn_cache;
+RUN rm -rf vendor/assets app/assets yarn_cache;
 # RUN if [ "$RAILS_ENV" = "production" ] ; then rm -rf vendor/assets app/assets node_modules yarn_cache; fi
 
-COPY --from=assets /usr/local/bundle /usr/local/bundle
-COPY --from=assets ${RAILS_ROOT}/vendor/bundle vendor/bundle
-COPY --from=assets ${RAILS_ROOT}/public/assets public/assets
-COPY --from=assets ${RAILS_ROOT}/public/packs public/packs
+# COPY --from=assets /usr/local/bundle /usr/local/bundle
+# COPY --from=assets ${RAILS_ROOT}/vendor/bundle vendor/bundle
+# COPY --from=assets ${RAILS_ROOT}/public/assets public/assets
+# COPY --from=assets ${RAILS_ROOT}/public/packs public/packs
 
-# COPY --from=localhost/assets:latest /usr/local/bundle /usr/local/bundle
-# COPY --from=localhost/assets:latest ${RAILS_ROOT}/vendor/bundle vendor/bundle
-# COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/assets public/assets
-# COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/packs public/packs
+COPY --from=localhost/assets:latest /usr/local/bundle /usr/local/bundle
+COPY --from=localhost/assets:latest ${RAILS_ROOT}/vendor/bundle vendor/bundle
+COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/assets public/assets
+COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/packs public/packs
 
 
 EXPOSE 3001
