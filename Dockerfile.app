@@ -196,6 +196,9 @@ COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/assets public/assets
 COPY --from=localhost/assets:latest ${RAILS_ROOT}/public/packs public/packs
 
 
+EXPOSE 3001
+
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
 
 
 # Copy assets and cache from the latest build

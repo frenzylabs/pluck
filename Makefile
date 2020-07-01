@@ -42,75 +42,16 @@ buildassets:
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest -t localhost/assets:latest --target assets . 
 	# DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest --build-arg BUILDKIT_INLINE_CACHE=1 -t localhost/assets:latest --target assets . 
 
-buildassets3:
-	$(eval IMAGE=localhost/pluck:test10)
-	$(eval ASSET_IMAGE=localhost/assets:latest)
-	
-	mkdir -p ${PWD}/.cache/vendor/bundle
-	mkdir -p ${PWD}/.cache/public/assets
-	mkdir -p ${PWD}/.cache/public/packs
-	mkdir -p ${PWD}/.cache/yarn_cache
-	
-	mv -f ${PWD}/.cache/vendor/bundle/** ${PWD}/vendor/bundle/
-	mv -f ${PWD}/.cache/public/assets ${PWD}/public/
-	mv -f ${PWD}/.cache/public/packs ${PWD}/public/
-	mv -f ${PWD}/.cache/yarn_cache ${PWD}/
-	# cp -rf ${PWD}/.cache/vendor/bundle ${PWD}/vendor/
-	# cp -rf ${PWD}/.cache/public/assets ${PWD}/public/assets
-	# cp -rf ${PWD}/.cache/public/packs ${PWD}/public/packs
-	# cp -rf ${PWD}/.cache/yarn_cache ${PWD}/yarn_cache
-	DOCKER_BUILDKIT=1 docker build -f Dockerfile.app -t localhost/assets:latest --target assets .
-	
-	rm -rf ${PWD}/vendor/bundle/ruby
-	rm -rf ${PWD}/public/assets
-	rm -rf ${PWD}/public/packs
-	rm -rf ${PWD}/yarn_cache/**
-
-
-	docker create -ti --name dummy ${ASSET_IMAGE} /bin/bash
-	docker cp dummy:/var/www/pluck/vendor/bundle $(PWD)/.cache/vendor
-	docker cp dummy:/var/www/pluck/public $(PWD)/.cache/
-	docker cp dummy:/var/www/pluck/yarn_cache $(PWD)/.cache/
-	docker rm -f dummy
 
 buildfinal:	
 	$(eval IMAGE=localhost/pluck:test10)
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest -t ${IMAGE} --target final .
 
-buildpluck2:
-	$(eval IMAGE=localhost/pluck:test10)
-	$(eval ASSET_IMAGE=localhost/assets:latest)
-	
-	mkdir -p ${PWD}/.cache/vendor/bundle
-	mkdir -p ${PWD}/.cache/public/assets
-	mkdir -p ${PWD}/.cache/public/packs
-	mkdir -p ${PWD}/.cache/yarn_cache
-	
-	cp -rf ${PWD}/.cache/vendor/bundle ${PWD}/vendor/
-	cp -rf ${PWD}/.cache/public/assets ${PWD}/public/assets
-	cp -rf ${PWD}/.cache/public/packs ${PWD}/public/packs
-	cp -rf ${PWD}/.cache/yarn_cache ${PWD}/yarn_cache
-	docker build -f Dockerfile.app -t localhost/assets:latest --target assets .
-	
-	rm -rf ${PWD}/vendor/bundle/ruby
-	rm -rf ${PWD}/public/assets
-	rm -rf ${PWD}/public/packs
-	rm -rf ${PWD}/yarn_cache/**
-
-
-	docker create -ti --name dummy ${ASSET_IMAGE} /bin/bash
-	docker cp dummy:/var/www/pluck/vendor/bundle $(PWD)/.cache/vendor
-	docker cp dummy:/var/www/pluck/public $(PWD)/.cache/
-	docker cp dummy:/var/www/pluck/yarn_cache $(PWD)/.cache/
-	docker rm -f dummy
-
-	
-
-	docker build -f Dockerfile.app -t ${IMAGE} --target final .
 
 run:
 	$(eval KUBECONFIG=${PWD}/../layerkeep-infra/staging)
 	$(eval ELASTIC_PWD=cfxrt6lf8fk7vj9m66946hcd)
+	$(eval IMAGE=registry.digitalocean.com/frenzylabs/pluck:staging-build-df4fd72)
 # $(eval ELASTIC_PWD=$(shell cd ${PWD}/../layerkeep-infra/staging && kubectl get secret layerkeep-es-elastic-user -n elastic-system --template={{.data.elastic}} | base64 -d))
 	echo "${ELASTIC_PWD}"
 	docker run -it -p 3002:3002 -p 5432 -p 9200 \
@@ -121,7 +62,7 @@ run:
 	-e PG_PASSWORD=d22LFEbD4zUATJT0 \
 	-e ELASTIC_PWD=${ELASTIC_PWD} \
 	-e ELASTICSEARCH_URL="https://elastic:$(ELASTIC_PWD)@host.docker.internal:9200" \
-	localhost/pluck:test10 bundle exec rails s -p 3002 -b 0.0.0.0
+	${IMAGE} bundle exec rails s -p 3002 -b 0.0.0.0
 	#/bin/bash 
 
 
