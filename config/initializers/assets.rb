@@ -13,7 +13,7 @@ Rails.application.config.assets.paths << Rails.root.join('node_modules')
 # folder are already added.
 # Rails.application.config.assets.precompile += %w( admin.js admin.css )
 
-Rails.application.config.assets.paths << Rails.root.join('vendor')
+Rails.application.config.assets.paths << Rails.root.join('vendor/assets')
 # Rails.application.config.assets.paths += Dir["#{Rails.root}/vendor/**/*"].sort_by { |dir| -dir.size }
 # Rails.application.config.assets.precompile << %r{themes/assets/.*$}
 
