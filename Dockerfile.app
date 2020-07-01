@@ -184,7 +184,7 @@ RUN mount=type=cache,target=${RAILS_ROOT}/public SECRET_KEY_BASE=1 PRECOMPILE_AS
 # RUN if [ "$RAILS_ENV" = "production" ] ; then SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile; else echo "dev assets"; fi
 
 FROM assets-${TARGET_ENV} as assets
-RUN rm -rf tmp
+RUN rm -rf tmp node_modules
 
 FROM assets-dev as finaldev
 
