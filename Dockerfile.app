@@ -185,7 +185,9 @@ COPY . .
 
 FROM main as final
 
-COPY . .
+RUN echo "Rails root = ${RAILS_ROOT}"
+
+COPY ./ ./
 
 RUN rm -rf vendor/assets app/assets node_modules yarn_cache;
 # RUN if [ "$RAILS_ENV" = "production" ] ; then rm -rf vendor/assets app/assets node_modules yarn_cache; fi
