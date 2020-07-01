@@ -75,6 +75,8 @@ COPY Gemfile.lock Gemfile.lock
 # RUN bundle install --jobs 20 --retry 5 --without test 
 RUN echo ""
 RUN which bundle
+RUN echo ${pwd}
+
 RUN mount=type=cache,target=$RAILS_ROOT/vendor/bundle bundle install --jobs 20 --retry 5 --without test
 
 
@@ -84,6 +86,9 @@ COPY Gemfile Gemfile
 COPY Gemfile.lock Gemfile.lock
 # RUN bundle install --jobs 20 --retry 5 --without test 
 RUN echo "HI"
+RUN which bundle
+RUN echo ${pwd}
+
 RUN mount=type=cache,target=${RAILS_ROOT}/vendor/bundle bundle install --deployment --jobs 20 --retry 5 --without test development
 # COPY ./vendor/bundle ./vendor/bundle
 # RUN if [ "$RAILS_ENV" = "production" ] ; then echo "prod" && bundle install --deployment --jobs 20 --retry 5 --without test development; else bundle install --jobs 20 --retry 5 --without test ; fi
