@@ -73,7 +73,8 @@ FROM main as gems-dev
 COPY Gemfile Gemfile
 COPY Gemfile.lock Gemfile.lock
 # RUN bundle install --jobs 20 --retry 5 --without test 
-RUN echo "HI"
+RUN echo ""
+RUN which bundle
 RUN mount=type=cache,target=$RAILS_ROOT/vendor/bundle bundle install --jobs 20 --retry 5 --without test
 
 
