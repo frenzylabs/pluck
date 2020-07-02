@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:experimental
 ARG TARGET_ENV=prod
 
-FROM ruby:2.6.6-slim-stretch as main
+FROM ruby:2.6.6-slim-stretch as base
 # FROM ruby:2.6.6-alpine as main
 
 # RUN apk update && \
@@ -29,12 +29,14 @@ RUN apt-get update && apt-get install -y \
     vim \
     libmagic-dev \
     pkg-config \
-    git
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
 RUN apt-get update && apt-get install -y \
     nodejs \
-    npm
+    npm \
+    && rm -rf /var/lib/apt/lists/*
 
 # RUN apt-get update && apt-get install -y cmake npm
 # RUN apt-get update && apt-get install -y \
@@ -69,7 +71,7 @@ RUN mkdir -p $RAILS_ROOT/vendor/bundle
 # Adding gems
 
 ## DEV BUNDLER
-FROM main as gems-dev
+FROM base as gems-dev
 
 COPY Gemfile Gemfile.lock ./
 RUN mount=type=cache,target=$RAILS_ROOT/vendor/bundle bundle install --jobs 20 --retry 5 --without test
@@ -78,7 +80,7 @@ COPY package.json yarn.lock ./
 RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --update-checksums
 
 ## PROD BUNDLER
-FROM main as gems-prod
+FROM base as gems-prod
 
 COPY Gemfile Gemfile.lock ./
 
@@ -127,35 +129,17 @@ RUN yarn config set cache-folder ${RAILS_ROOT}/yarn_cache
 
 RUN mount=type=cache,target=${RAILS_ROOT}/public SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile
 
-RUN rm -rf tmp node_modules
-
-# ### DEV ASSETS
-# FROM asset-files as assets-dev
-
-# RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --update-checksums
+RUN rm -rf tmp node_modules yarn_cache
 
 
-# ### PROD ASSETS
-# FROM asset-files as assets-prod
-
-# RUN mount=type=cache,target=${RAILS_ROOT}/yarn_cache yarn install --check-files --production=true
-# RUN mount=type=cache,target=${RAILS_ROOT}/public SECRET_KEY_BASE=1 PRECOMPILE_ASSETS=true bundle exec rake assets:precompile
-
-
-# FROM assets-${TARGET_ENV} as assets
-# RUN rm -rf tmp node_modules
-
+### Dev Final Image
 FROM gems-dev as finaldev
 
 COPY . .
 
 
 ## PROD BUILD
-FROM main as final
-
-# WORKDIR $RAILS_ROOT
-
-# RUN echo "Rails root = ${RAILS_ROOT}"
+FROM base as final
 
 COPY ./ ./
 

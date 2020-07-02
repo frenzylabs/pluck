@@ -133,9 +133,6 @@ jobs:
           DOCKER_BUILDKIT=1 docker build -f Dockerfile.app  --cache-from ${ASSET_CACHE} --cache-from ${IMAGE_LATEST} \
           -t ${IMAGE} -t ${IMAGE_LATEST} --target final .
 
-# docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
-
-
       - name: Push docker image
         if: github.event_name != 'pull_request'
         id: build-image
