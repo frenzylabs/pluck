@@ -11,13 +11,16 @@ profiles:
       tagPolicy:
         gitCommit:
           prefix: dev-
-      local: {}
+      local:
+        useBuildkit: true
       artifacts:
       - image: localhost/pluck
         docker:
-          dockerfile: Dockerfile
+          dockerfile: Dockerfile.app
+          target: finaldev
           buildArgs:
             RAILS_ENV: '{{.RAILS_ENV}}'
+            TARGET_ENV: 'dev'
         sync:
           # infer:
           #   - '**'

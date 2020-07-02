@@ -24,10 +24,13 @@ Things you may want to cover:
 * ...
 
 Requirements:
+1. Login to aws in order to decrypt the keys.
+2. Set ENV: AWS_PROFILE=all
+
 
 Need postgres and elasticsearch services running.  You can also use kubectl port-forward to connect to remote instances.
 If you connect to staging you'll need to update values.local.yaml environment variables
-1. PG_HOST = host.docker.local
+1. PG_HOST = host.docker.internal
 2. PG_PASSWORD     
     `echo $(sops -d --extract '["pluck"]["postgres"]["password"]' secrets/secrets.staging.yaml)`
 3. Set ELASTICSEARCH_URL = "https://elastic:$(ELASTIC_PWD)@host.docker.internal:9200"

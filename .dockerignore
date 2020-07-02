@@ -31,7 +31,8 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-# /public
+/public/assets
+/public/packs
 /public/packs-test
 
 yarn-debug.log*
@@ -39,3 +40,5 @@ yarn-debug.log*
 
 skaffold.yaml
 values.local.yaml
+
+.cache

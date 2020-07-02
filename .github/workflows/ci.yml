@@ -82,58 +82,32 @@ jobs:
           TAG=${TARGET}-${VERSION}
           echo "::set-env name=TAG::${TAG}"
           echo "::set-env name=IMAGE::${IMAGE_REPOSITORY}:${TAG}"
+          echo "::set-env name=IMAGE_LATEST::${IMAGE_REPOSITORY}:${TARGET}-latest"
+          echo "::set-env name=ASSET_CACHE::${IMAGE_REPOSITORY}:${TARGET}-assets"
           echo "::set-env name=CLUSTER_KEY::DO_${TARGET^^}_CLUSTER"
 
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: |
-            node_module_cache
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
+      # - name: Cache node modules
+      #   uses: actions/cache@v2
+      #   env:
+      #     cache-name: cache-node-modules
+      #   with:
+      #     path: |
+      #       node_module_cache
+      #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('yarn.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-build-${{ env.cache-name }}-
 
-      - name: Cache gems
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-gems
-        with:
-          path: |
-            vendor/cache
-            vendor/bundle
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.cache-name }}-
-            
-      - name: Cache assets
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-assets
-        with:
-          path: |
-            public
-            **/public
-          key: ${{ runner.os }}-cacheassets-${{ env.cache-name }}
-          restore-keys: |
-            ${{ runner.os }}-cacheassets-
-
-      - name: Build docker build image
-        run: |
-          docker build -f ${PWD}/Dockerfile -t ${IMAGE} .
-
-      - name: Copy to Cache Dirs
-        run: |
-          docker run --rm \
-            -v ${PWD}/vendor/bundle:/var/www/pluck/bundlecache \
-            -v ${PWD}/public:/var/www/pluck/publiccache \
-            ${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
-
-          echo ${IMAGE}
-          docker run --rm \
-            -v ${PWD}/node_module_cache:/var/www/pluck/nodecache \
-            ${IMAGE} /bin/sh -c "cp -rf node_modules/* nodecache/"
+      # - name: Cache gems
+      #   uses: actions/cache@v2
+      #   env:
+      #     cache-name: cache-gems
+      #   with:
+      #     path: |
+      #       vendor/cache
+      #       vendor/bundle
+      #     key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('Gemfile.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-${{ env.cache-name }}-
 
 
       - name: Install doctl
@@ -142,13 +116,28 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
-        run: doctl registry login
+        run: doctl registry login          
+
+      - name: Build Docker Assets
+        run: |
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from ${ASSET_CACHE} --build-arg BUILDKIT_INLINE_CACHE=1 -t localhost/assets:latest --target assets .
+
+      - name: Push Assets
+        run: |    
+          docker tag localhost/assets:latest ${ASSET_CACHE}
+          docker push ${ASSET_CACHE}
+
+      - name: Build docker build image
+        run: |
+          DOCKER_BUILDKIT=1 docker build -f Dockerfile.app  --cache-from ${ASSET_CACHE} --cache-from ${IMAGE_LATEST} \
+          -t ${IMAGE} -t ${IMAGE_LATEST} --target final .
 
       - name: Push docker image
         if: github.event_name != 'pull_request'
         id: build-image
         run: |
             docker push ${IMAGE}
+            docker push ${IMAGE_LATEST}
             echo "::set-output name=build_image::${IMAGE}"
 
       - name: Set Artifacts

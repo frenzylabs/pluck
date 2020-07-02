@@ -25,4 +25,73 @@ release:
 
 prune-tags:
 	git tag -l | xargs git tag -d && git fetch -t 
+
+# 5c5fb76psr7v7w8s84qgvnlg	
+# docker run --rm \
+# 		-v ${PWD}/.cache/vendor/bundle:/var/www/pluck/bundlecache \
+# 		-v ${PWD}/.cache/public:/var/www/pluck/publiccache \
+# 		${ASSET_IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
+
+# docker run --rm \
+# 	-v ${PWD}/../cache/yarn_cache:/var/www/pluck/nodecache \
+# 	${ASSET_IMAGE} /bin/sh -c 'CACHE_DIR=$$(yarn cache dir) && cp -rf $${CACHE_DIR} nodecache/'		
+
+buildassets:
+	$(eval IMAGE=localhost/pluck:test10)
+	$(eval ASSET_IMAGE=localhost/assets:latest)
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest -t localhost/assets:latest --target assets . 
+
+# DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest --build-arg BUILDKIT_INLINE_CACHE=1 -t localhost/assets:latest --target assets . 
+
+
+buildfinal:	
+	$(eval IMAGE=localhost/pluck:test10)
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile.app --cache-from localhost/assets:latest -t ${IMAGE} --target final .
+
+
+run:
+	$(eval KUBECONFIG=${PWD}/../layerkeep-infra/staging)
+	$(eval ELASTIC_PWD=cfxrt6lf8fk7vj9m66946hcd)
+	$(eval IMAGE=registry.digitalocean.com/frenzylabs/pluck:staging-build-df4fd72)
+# $(eval ELASTIC_PWD=$(shell cd ${PWD}/../layerkeep-infra/staging && kubectl get secret layerkeep-es-elastic-user -n elastic-system --template={{.data.elastic}} | base64 -d))
+	echo "${ELASTIC_PWD}"
+	docker run -it -p 3002:3002 -p 5432 -p 9200 \
+	-e RAILS_LOG_TO_STDOUT=true \
+	-e RAILS_SERVE_STATIC_FILES=true \
+	-e SECRET_KEY_BASE=1234 \
+	-e PG_HOST=host.docker.internal \
+	-e PG_PASSWORD=d22LFEbD4zUATJT0 \
+	-e ELASTIC_PWD=${ELASTIC_PWD} \
+	-e ELASTICSEARCH_URL="https://elastic:$(ELASTIC_PWD)@host.docker.internal:9200" \
+	${IMAGE} bundle exec rails s -p 3002 -b 0.0.0.0
+	#/bin/bash 
+
+
+# --mount type=bind,source="$(PWD)/.cache/vendor/bundle",target=/var/www/pluck/bundlecache2,consistency=cached \
+# 		${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/"
+
+cacheit2:
+	$(eval IMAGE=localhost/assets:latest)
+	docker create -ti --name dummy ${IMAGE} /bin/bash
+	docker cp dummy:/var/www/pluck/vendor/bundle $(PWD)/.cache/vendor
+	docker cp dummy:/var/www/pluck/public $(PWD)/.cache/
+	docker rm -f dummy
+
+# 	--mount type=bind,source="$(PWD)/.cache/vendor/bundle",target=/var/www/pluck/bundlecache2,consistency=cached \
+# 	${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/"
+
+cacheit:
+	docker run --privileged --rm \		
+		-v $(PWD)/.cache/vendor/bundle:/var/www/pluck/bundlecache \
+		-v $(PWD)/.cache/public:/var/www/pluck/publiccache \
+		${IMAGE} /bin/sh -c "cp -rf vendor/bundle/* bundlecache/ && cp -rf public/* publiccache/"
+
+cacheyarn:
+	$(eval IMAGE=localhost/pluck:test7)
+	echo ${IMAGE}
+	docker run --rm \
+	-v ${PWD}/yarn_cache:/var/www/pluck/nodecache \
+	${IMAGE} /bin/sh -c 'CACHE_DIR=$$(yarn cache dir) && cp -rf $${CACHE_DIR} nodecache/'
 	
+# ${IMAGE} /bin/sh -c 'CACHE_DIR=$$(yarn cache dir) cp -rf $${CACHE_DIR} nodecache/'
+# ${IMAGE} /bin/sh -c 'echo $$(yarn cache dir)'
