@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'master'
-      - 'features/buildkit'
     tags-ignore:
       - "**"
   pull_request:
@@ -163,7 +162,7 @@ jobs:
           
 
   deploy:
-    # if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.event_name == 'release'
+    if: (github.ref == 'refs/heads/master' && github.event_name == 'push') || github.event_name == 'release'
     needs: build
     runs-on: ubuntu-latest
     defaults:
